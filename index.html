@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LuminOus Tech – Phone Repairs & Electronics</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0f1520;
+    --card: #131b2a;
+    --accent: #00c8ff;
+    --accent2: #ff6b2b;
+    --text: #e8edf5;
+    --muted: #7a8ba0;
+    --border: rgba(0,200,255,0.12);
+    --glow: 0 0 40px rgba(0,200,255,0.15);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+  h1,h2,h3,h4,nav,button { font-family: 'Outfit', sans-serif; }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(8,12,20,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    z-index: 999;
+  }
+  .logo {
+    font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 0.9rem;
+    font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-actions {
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .nav-cta {
+    background: var(--accent); color: #080c14;
+    border: none; padding: 0.6rem 1.4rem; border-radius: 6px;
+    font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover { background: #33d4ff; transform: translateY(-1px); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 8rem 4rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(0,200,255,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(255,107,43,0.05) 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+  }
+  .hero-content { position: relative; max-width: 680px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,200,255,0.08); border: 1px solid var(--border);
+    color: var(--accent); padding: 0.4rem 1rem; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.5rem; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  h1 {
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -0.02em; margin-bottom: 1.5rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub {
+    font-size: 1.15rem; color: var(--muted); line-height: 1.7;
+    max-width: 500px; margin-bottom: 2.5rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-btns {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent); color: #080c14;
+    border: none; padding: 0.9rem 2rem; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.03em;
+    transition: all 0.2s; box-shadow: 0 0 30px rgba(0,200,255,0.3);
+  }
+  .btn-primary:hover { background: #33d4ff; transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,200,255,0.5); }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border); padding: 0.9rem 2rem; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .hero-stats {
+    display: flex; gap: 3rem; margin-top: 4rem;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat-num { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .hero-visual {
+    position: absolute; right: 4rem; top: 50%; transform: translateY(-50%);
+    width: 420px; height: 420px; animation: fadeUp 0.9s 0.2s ease both;
+  }
+  .phone-circle {
+    width: 420px; height: 420px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(0,200,255,0.15), transparent 60%);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .phone-icon { font-size: 8rem; filter: drop-shadow(0 0 30px rgba(0,200,255,0.4)); }
+  .orbit {
+    position: absolute; border-radius: 50%; border: 1px dashed rgba(0,200,255,0.2);
+    animation: spin 20s linear infinite;
+  }
+  .orbit-1 { width: 320px; height: 320px; }
+  .orbit-2 { width: 440px; height: 440px; animation-direction: reverse; animation-duration: 30s; }
+  .orbit-dot {
+    width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
+    position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  /* SECTIONS */
+  section { padding: 6rem 4rem; }
+  .section-label {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 800;
+    letter-spacing: -0.01em; margin-bottom: 1rem;
+  }
+  .section-sub { color: var(--muted); font-size: 1.05rem; line-height: 1.7; max-width: 560px; }
+  .section-header { margin-bottom: 3.5rem; }
+
+  /* SERVICES */
+  #services { background: var(--surface); }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+  .service-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2rem;
+    transition: all 0.3s; cursor: default;
+    position: relative; overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(0,200,255,0.06), transparent 60%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .service-card:hover { border-color: rgba(0,200,255,0.35); transform: translateY(-4px); box-shadow: var(--glow); }
+  .service-card:hover::before { opacity: 1; }
+  .service-icon { font-size: 2.2rem; margin-bottom: 1.2rem; }
+  .service-name { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .service-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.2rem; }
+
+  /* BOOKING */
+  #booking { background: var(--bg); }
+  .booking-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+  }
+  .booking-info h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; }
+  .booking-info p { color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+  .booking-perks { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+  .booking-perks li { display: flex; align-items: center; gap: 0.8rem; color: var(--muted); font-size: 0.9rem; }
+  .perk-icon { color: var(--accent); font-size: 1.1rem; }
+  .booking-form {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2.5rem;
+  }
+  .form-title { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 2rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.75rem 1rem; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.95rem;
+    transition: border-color 0.2s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.08);
+  }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-group select option { background: #131b2a; }
+  .form-submit {
+    width: 100%; background: var(--accent); color: #080c14;
+    border: none; padding: 1rem; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.03em; margin-top: 0.5rem;
+    transition: all 0.2s;
+  }
+  .form-submit:hover { background: #33d4ff; transform: translateY(-1px); }
+
+  /* SHOP */
+  #shop { background: var(--surface); }
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+  .product-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; transition: all 0.3s; cursor: pointer;
+  }
+  .product-card:hover { border-color: rgba(0,200,255,0.35); transform: translateY(-4px); box-shadow: var(--glow); }
+  .product-img {
+    height: 180px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f1520, #131b2a);
+    font-size: 4rem;
+  }
+  .product-info { padding: 1.2rem; }
+  .product-name { font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 0.3rem; }
+  .product-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-price { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+  .add-btn {
+    background: var(--accent); color: #080c14; border: none;
+    padding: 0.45rem 1rem; border-radius: 6px;
+    font-family: 'Outfit', sans-serif; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .add-btn:hover { background: #33d4ff; }
+
+  /* SELL GADGET */
+  #sell { background: var(--bg); }
+  .sell-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+  }
+  .sell-steps { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
+  .step {
+    display: flex; gap: 1.2rem; align-items: flex-start;
+    padding: 1.2rem; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .step-num {
+    width: 36px; height: 36px; background: rgba(0,200,255,0.1);
+    border: 1px solid var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--accent);
+    flex-shrink: 0; font-size: 0.9rem;
+  }
+  .step-text h4 { font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 0.3rem; }
+  .step-text p { color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
+  .sell-form {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2.5rem;
+  }
+
+  /* TESTIMONIALS */
+  #testimonials { background: var(--surface); }
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .testi-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.8rem;
+    transition: all 0.3s;
+  }
+  .testi-card:hover { border-color: rgba(0,200,255,0.3); transform: translateY(-3px); }
+  .stars { color: #fbbf24; font-size: 1rem; margin-bottom: 1rem; letter-spacing: 2px; }
+  .testi-text { color: var(--muted); line-height: 1.7; font-size: 0.95rem; margin-bottom: 1.5rem; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 0.8rem; }
+  .author-avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.9rem; color: #080c14;
+  }
+  .author-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; }
+  .author-loc { font-size: 0.8rem; color: var(--muted); }
+
+  /* CONTACT */
+  #contact { background: var(--bg); }
+  .contact-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+  .contact-info { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
+  .contact-item {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1.2rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .contact-icon { font-size: 1.4rem; }
+  .contact-text h4 { font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 0.2rem; font-size: 0.9rem; }
+  .contact-text p { color: var(--muted); font-size: 0.875rem; }
+  .map-placeholder {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    height: 300px; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); flex-direction: column; gap: 1rem;
+  }
+  .map-placeholder .map-icon { font-size: 3rem; }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 3rem 4rem; text-align: center;
+  }
+  .footer-logo { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 1rem; }
+  .footer-logo span { color: var(--accent); }
+  .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy { color: var(--muted); font-size: 0.8rem; }
+
+  /* PHOTO UPLOAD */
+  .photo-upload {
+    border: 2px dashed var(--border); border-radius: 10px;
+    padding: 1.5rem; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--surface);
+  }
+  .photo-upload:hover { border-color: var(--accent); background: rgba(0,200,255,0.04); }
+  .photo-upload-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+  .photo-upload-text { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .photo-upload-hint { font-size: 0.78rem; color: var(--muted); }
+  .photo-preview { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.8rem; }
+  .photo-thumb {
+    width: 70px; height: 70px; border-radius: 8px; object-fit: cover;
+    border: 1px solid var(--border);
+  }
+
+  .nav-theme-btn {
+    background: var(--card); border: 1px solid var(--border);
+    width: 36px; height: 36px; border-radius: 8px;
+    font-size: 1rem; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-theme-btn:hover { border-color: var(--accent); transform: rotate(20deg); }
+
+  /* WHATSAPP FLOAT */
+  .wa-float {
+    position: fixed; bottom: 2rem; right: 2rem;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: #25D366; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; z-index: 9998;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+    animation: waPulse 2.5s infinite;
+    transition: transform 0.2s;
+    text-decoration: none;
+  }
+  .wa-float:hover { transform: scale(1.1); }
+  @keyframes waPulse {
+    0%,100% { box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
+    50% { box-shadow: 0 4px 35px rgba(37,211,102,0.7); }
+  }
+  .wa-tooltip {
+    position: fixed; bottom: 2.4rem; right: 5.5rem;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 0.5rem 1rem; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 0.8rem; font-weight: 600;
+    white-space: nowrap; z-index: 9997; pointer-events: none;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .wa-float:hover + .wa-tooltip { opacity: 1; }
+
+  /* ZAMBIA BADGE */
+  .zambia-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(0,200,255,0.06); border: 1px solid var(--border);
+    color: var(--muted); padding: 0.3rem 0.8rem; border-radius: 100px;
+    font-size: 0.75rem; margin-left: 1rem;
+  }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--accent); color: #080c14;
+    padding: 1rem 1.5rem; border-radius: 10px;
+    font-family: 'Outfit', sans-serif; font-weight: 700;
+    transform: translateY(100px); opacity: 0;
+    transition: all 0.4s; z-index: 9999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* HAMBURGER */
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 4px; z-index: 1001;
+  }
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: var(--text); border-radius: 2px;
+    transition: all 0.3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none; position: fixed; inset: 0; top: 60px;
+    background: var(--menu-bg, rgba(8,12,20,0.98)); backdrop-filter: blur(20px);
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    gap: 0; z-index: 998; padding: 2.5rem 1.5rem 3rem;
+    overflow-y: auto;
+    transition: background 0.3s;
+  }
+  .mobile-menu.open { display: flex; }
+
+  /* Nav links */
+  .mobile-menu .menu-links { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; margin-bottom: 2rem; width: 100%; }
+  .mobile-menu .menu-links a {
+    color: var(--text); text-decoration: none;
+    font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700;
+    letter-spacing: -0.01em; transition: color 0.2s;
+  }
+  .mobile-menu .menu-links a:hover { color: var(--accent); }
+
+  /* Divider */
+  .menu-divider {
+    width: 60px; height: 1px;
+    background: var(--border); margin: 0.5rem 0 1.5rem;
+  }
+
+  /* Call & WhatsApp buttons */
+  .menu-contact-btns {
+    display: flex; gap: 0.8rem; margin-bottom: 1.5rem; width: 100%; max-width: 320px;
+  }
+  .menu-call-btn, .menu-wa-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.75rem 1rem; border-radius: 10px;
+    font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 700;
+    text-decoration: none; border: none; cursor: pointer; transition: all 0.2s;
+  }
+  .menu-call-btn {
+    background: rgba(0,200,255,0.1); border: 1px solid var(--border);
+    color: var(--accent);
+  }
+  .menu-call-btn:hover { background: rgba(0,200,255,0.2); }
+  .menu-wa-btn {
+    background: #25D366; color: #fff;
+  }
+  .menu-wa-btn:hover { background: #1fb855; }
+  .menu-wa-btn svg, .menu-call-btn svg { flex-shrink: 0; }
+
+  /* Book Now CTA */
+  .mobile-cta {
+    background: var(--accent); color: #080c14;
+    border: none; padding: 0.9rem 2.5rem; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; margin-bottom: 1.5rem; width: 100%; max-width: 320px;
+    transition: background 0.2s;
+  }
+  .mobile-cta:hover { background: #33d4ff; }
+
+  /* Social links */
+  .menu-socials {
+    display: flex; gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .menu-social-btn {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    color: var(--text); text-decoration: none;
+    transition: all 0.2s;
+  }
+  .menu-social-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .menu-social-btn.fb:hover { border-color: #1877F2; color: #1877F2; }
+  .menu-social-btn.ig:hover { border-color: #E1306C; color: #E1306C; }
+  .menu-social-btn.tk:hover { border-color: #69C9D0; color: #69C9D0; }
+
+  /* Dark/Light mode toggle */
+  .menu-theme-toggle {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.4rem 1rem;
+    font-family: 'Outfit', sans-serif; font-size: 0.8rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+    user-select: none;
+  }
+  .menu-theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+  .theme-track {
+    width: 36px; height: 20px; border-radius: 100px;
+    background: var(--border); position: relative; transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .theme-track.on { background: var(--accent); }
+  .theme-thumb {
+    width: 14px; height: 14px; border-radius: 50%; background: white;
+    position: absolute; top: 3px; left: 3px; transition: transform 0.3s;
+  }
+  .theme-track.on .theme-thumb { transform: translateX(16px); }
+
+  /* Light mode overrides */
+  body.light-mode {
+    --bg: #eef1f7;
+    --surface: #e0e5ef;
+    --card: #f8f9fc;
+    --text: #0a0f1e;
+    --muted: #374151;
+    --border: rgba(30,80,160,0.15);
+    --glow: 0 0 40px rgba(0,150,200,0.12);
+    --menu-bg: rgba(238,241,247,0.98);
+  }
+
+  /* Nav */
+  body.light-mode nav {
+    background: rgba(238,241,247,0.92);
+    border-bottom: 1px solid rgba(30,80,160,0.15);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  body.light-mode .logo { color: #0a0f1e; }
+  body.light-mode .logo span { color: var(--accent); }
+  body.light-mode .nav-links a { color: #374151; }
+  body.light-mode .nav-links a:hover { color: var(--accent); }
+  body.light-mode .hamburger span { background: #0a0f1e; }
+  body.light-mode .nav-theme-btn {
+    background: #e0e5ef; border-color: rgba(30,80,160,0.2);
+  }
+
+  /* Hero */
+  body.light-mode .hero-grid { opacity: 0.15; }
+  body.light-mode .hero-sub { color: #374151; }
+  body.light-mode .hero-badge {
+    background: rgba(0,150,200,0.1); border-color: rgba(0,150,200,0.3);
+  }
+  body.light-mode .stat-label { color: #374151; }
+  body.light-mode .btn-secondary {
+    border-color: rgba(30,80,160,0.3); color: #0a0f1e;
+  }
+  body.light-mode .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Cards & Sections */
+  body.light-mode .service-card {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  body.light-mode .service-card:hover {
+    box-shadow: 0 4px 20px rgba(0,150,200,0.15);
+  }
+  body.light-mode .service-name { color: #0a0f1e; }
+  body.light-mode .service-desc { color: #374151; }
+  body.light-mode .section-sub { color: #374151; }
+  body.light-mode .section-label { color: var(--accent); }
+
+  /* Booking & Forms */
+  body.light-mode .booking-form,
+  body.light-mode .sell-form {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  body.light-mode .form-title { color: #0a0f1e; }
+  body.light-mode .form-group label { color: #374151; }
+  body.light-mode .form-group input,
+  body.light-mode .form-group select,
+  body.light-mode .form-group textarea {
+    background: #eef1f7;
+    border-color: rgba(30,80,160,0.2);
+    color: #0a0f1e;
+  }
+  body.light-mode .form-group input:focus,
+  body.light-mode .form-group select:focus,
+  body.light-mode .form-group textarea:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  body.light-mode .form-group select option { background: #f8f9fc; color: #0a0f1e; }
+  body.light-mode .booking-perks li { color: #374151; }
+  body.light-mode .booking-info p { color: #374151; }
+  body.light-mode .perk-icon { color: var(--accent); }
+
+  /* Shop */
+  body.light-mode .product-card {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  body.light-mode .product-name { color: #0a0f1e; }
+  body.light-mode .product-img {
+    background: linear-gradient(135deg, #e0e5ef, #eef1f7);
+  }
+
+  /* Steps */
+  body.light-mode .step {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  body.light-mode .step-text h4 { color: #0a0f1e; }
+  body.light-mode .step-text p { color: #374151; }
+
+  /* Testimonials */
+  body.light-mode .testi-card {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  body.light-mode .testi-text { color: #374151; }
+  body.light-mode .author-name { color: #0a0f1e; }
+  body.light-mode .author-loc { color: #6b7280; }
+
+  /* Review form */
+  body.light-mode .review-form-wrap {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  body.light-mode .review-form-title { color: #0a0f1e; }
+  body.light-mode .review-form-sub { color: #374151; }
+
+  /* Contact */
+  body.light-mode .contact-item {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  body.light-mode .contact-text h4 { color: #0a0f1e; }
+  body.light-mode .contact-text p { color: #374151; }
+  body.light-mode .map-placeholder {
+    background: #f8f9fc;
+    border-color: rgba(30,80,160,0.15);
+    color: #374151;
+  }
+
+  /* Footer */
+  body.light-mode footer {
+    background: #e0e5ef;
+    border-top-color: rgba(30,80,160,0.15);
+  }
+  body.light-mode .footer-logo { color: #0a0f1e; }
+  body.light-mode .footer-links a { color: #374151; }
+  body.light-mode .footer-links a:hover { color: var(--accent); }
+  body.light-mode .footer-copy { color: #6b7280; }
+
+  /* Photo upload */
+  body.light-mode .photo-upload {
+    background: #eef1f7;
+    border-color: rgba(30,80,160,0.2);
+  }
+  body.light-mode .photo-upload-text { color: #0a0f1e; }
+  body.light-mode .photo-upload-hint { color: #374151; }
+
+  /* Mobile menu */
+  body.light-mode .menu-theme-toggle {
+    color: #374151; border-color: rgba(30,80,160,0.2);
+    background: rgba(30,80,160,0.05);
+  }
+  body.light-mode .menu-social-btn {
+    background: rgba(30,80,160,0.06);
+    border-color: rgba(30,80,160,0.15);
+    color: #374151;
+  }
+  body.light-mode .menu-call-btn {
+    background: rgba(0,150,200,0.08);
+    border-color: rgba(0,150,200,0.25);
+  }
+
+  /* Coming soon overlay */
+  body.light-mode .coming-soon-overlay {
+    background: rgba(238,241,247,0.96);
+    border-color: rgba(30,80,160,0.2);
+  }
+  body.light-mode .cs-sub { color: #374151; }
+  body.light-mode .cs-input {
+    background: #eef1f7; border-color: rgba(30,80,160,0.2); color: #0a0f1e;
+  }
+  .sell-form-wrap {
+    position: relative;
+  }
+  .coming-soon-overlay {
+    position: absolute; inset: 0;
+    background: rgba(8,12,20,0.92);
+    backdrop-filter: blur(6px);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10; gap: 1rem; padding: 2rem 1.5rem;
+    border: 1px solid var(--border);
+    overflow: hidden; box-sizing: border-box;
+  }
+  body.light-mode .coming-soon-overlay {
+    background: rgba(240,244,248,0.93);
+  }
+  .cs-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,107,43,0.12); border: 1px solid rgba(255,107,43,0.4);
+    color: #ff6b2b; padding: 0.4rem 1.1rem; border-radius: 100px;
+    font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .cs-badge::before { content: '🔒'; font-size: 0.75rem; }
+  .cs-title {
+    font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800;
+    color: var(--text); text-align: center; line-height: 1.3;
+  }
+  .cs-sub {
+    color: var(--muted); font-size: 0.9rem; text-align: center;
+    line-height: 1.6; max-width: 280px;
+  }
+  .cs-divider {
+    width: 40px; height: 1px; background: var(--border);
+  }
+  .cs-waitlist-label {
+    font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
+  }
+  .cs-input-row {
+    display: flex; gap: 0.5rem; width: 100%; max-width: 300px; flex-wrap: wrap;
+  }
+  .cs-input {
+    flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.7rem 1rem; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none;
+    transition: border-color 0.2s; width: 100%;
+  }
+  .cs-input:focus { border-color: var(--accent); }
+  .cs-input::placeholder { color: var(--muted); }
+  .cs-btn {
+    background: var(--accent); color: #080c14;
+    border: none; padding: 0.7rem 1.2rem; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s; width: 100%;
+  }
+  .cs-btn:hover { background: #33d4ff; transform: translateY(-1px); }
+  .cs-note {
+    font-size: 0.75rem; color: var(--muted); text-align: center;
+  }
+
+  /* REVIEW FORM */
+  .review-form-wrap {
+    margin-top: 3.5rem; background: var(--card);
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 2.5rem; position: relative; overflow: hidden;
+  }
+  .review-form-wrap::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at top right, rgba(0,200,255,0.05), transparent 60%);
+    pointer-events: none;
+  }
+  .review-form-title {
+    font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 800;
+    margin-bottom: 0.4rem; color: var(--text);
+  }
+  .review-form-sub {
+    color: var(--muted); font-size: 0.9rem; margin-bottom: 1.8rem;
+  }
+  .star-picker {
+    display: flex; gap: 0.4rem; margin-bottom: 1.5rem;
+  }
+  .star-picker span {
+    font-size: 1.8rem; cursor: pointer; transition: transform 0.15s;
+    color: var(--border); filter: grayscale(1);
+    user-select: none;
+  }
+  .star-picker span.active {
+    color: #fbbf24; filter: grayscale(0); transform: scale(1.15);
+  }
+  .star-picker span:hover { transform: scale(1.2); }
+  .review-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .review-status {
+    margin-top: 1rem; padding: 0.9rem 1.2rem; border-radius: 10px;
+    font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600;
+    display: none; align-items: center; gap: 0.6rem;
+  }
+  .review-status.checking {
+    display: flex; background: rgba(0,200,255,0.08);
+    border: 1px solid var(--border); color: var(--accent);
+  }
+  .review-status.approved {
+    display: flex; background: rgba(37,211,102,0.1);
+    border: 1px solid rgba(37,211,102,0.3); color: #25D366;
+  }
+  .review-status.rejected {
+    display: flex; background: rgba(255,107,43,0.08);
+    border: 1px solid rgba(255,107,43,0.3); color: #ff6b2b;
+  }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+
+  /* TABLET */
+  @media (max-width: 1024px) {
+    nav { padding: 1rem 2rem; }
+    section { padding: 5rem 2rem; }
+    #hero { padding: 8rem 2rem 4rem; }
+    .hero-visual { width: 300px; height: 300px; right: 2rem; }
+    .phone-circle { width: 300px; height: 300px; }
+    .orbit-1 { width: 220px; height: 220px; }
+    .orbit-2 { width: 320px; height: 320px; }
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    /* Nav */
+    nav { padding: 1rem 1.2rem; }
+    .nav-links { display: none; }
+    .nav-cta { display: none; }
+    .nav-actions { display: none; }
+    .hamburger { display: flex; }
+
+    /* Sections */
+    section { padding: 3.5rem 1.2rem; }
+    #hero { padding: 6rem 1.2rem 3rem; min-height: auto; }
+
+    /* Hero */
+    .hero-visual { display: none; }
+    .hero-content { max-width: 100%; }
+    h1 { font-size: 2.4rem; line-height: 1.1; }
+    .hero-sub { font-size: 1rem; color: var(--muted); }
+    .hero-badge { font-size: 0.72rem; }
+    .hero-btns { flex-direction: column; gap: 0.8rem; }
+    .btn-primary, .btn-secondary { width: 100%; text-align: center; padding: 1rem; font-size: 1rem; }
+    .hero-stats { gap: 1.2rem; flex-wrap: wrap; margin-top: 2.5rem; }
+    .stat-num { font-size: 1.6rem; }
+    .stat-label { font-size: 0.75rem; }
+
+    /* Section titles */
+    .section-title { font-size: 1.7rem; }
+    .section-sub { font-size: 0.95rem; color: var(--muted); }
+    .section-label { font-size: 0.72rem; }
+
+    /* Services */
+    .services-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .service-card { padding: 1.5rem; }
+    .service-name { font-size: 1rem; color: var(--text); }
+    .service-desc { font-size: 0.875rem; color: var(--muted); }
+
+    /* Booking & Sell */
+    .booking-wrap, .sell-wrap, .contact-wrap { grid-template-columns: 1fr; gap: 2rem; }
+    .booking-form, .sell-form { padding: 1.5rem; }
+    .form-title { font-size: 1rem; color: var(--text); }
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+    .form-group label { color: var(--muted); font-size: 0.78rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      font-size: 1rem; padding: 0.85rem 1rem;
+      background: var(--surface); color: var(--text);
+      border-color: var(--border);
+    }
+    .form-group select option { background: var(--surface); color: var(--text); }
+    .form-submit { font-size: 1rem; padding: 1rem; }
+    .booking-perks li { font-size: 0.875rem; color: var(--muted); }
+    .booking-info p { color: var(--muted); font-size: 0.95rem; }
+
+    /* Shop */
+    .shop-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .product-img { height: 130px; font-size: 3rem; }
+    .product-name { font-size: 0.875rem; }
+    .product-desc { font-size: 0.78rem; color: var(--muted); display: none; }
+    .product-price { font-size: 1rem; }
+    .add-btn { font-size: 0.75rem; padding: 0.4rem 0.7rem; }
+
+    /* Sell steps */
+    .sell-steps { gap: 1rem; }
+    .step { padding: 1rem; }
+    .step-text h4 { font-size: 0.9rem; color: var(--text); }
+    .step-text p { font-size: 0.82rem; color: var(--muted); }
+
+    /* Testimonials */
+    .testi-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .testi-card { padding: 1.4rem; }
+    .testi-text { font-size: 0.9rem; color: var(--muted); }
+    .author-name { font-size: 0.875rem; color: var(--text); }
+    .author-loc { font-size: 0.75rem; color: var(--muted); }
+
+    /* Contact */
+    .contact-item { padding: 1rem; }
+    .contact-text h4 { font-size: 0.875rem; color: var(--text); }
+    .contact-text p { font-size: 0.82rem; color: var(--muted); }
+    .map-placeholder { height: 200px; }
+
+    /* Footer */
+    footer { padding: 2rem 1.2rem; }
+    .footer-links { gap: 1rem; }
+    .footer-links a { font-size: 0.82rem; color: var(--muted); }
+    .footer-copy { font-size: 0.75rem; color: var(--muted); }
+
+    /* Photo upload */
+    .photo-upload-text { font-size: 0.85rem; color: var(--text); }
+    .photo-upload-hint { font-size: 0.75rem; color: var(--muted); }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    h1 { font-size: 2rem; }
+    .shop-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1rem; }
+    .stat-num { font-size: 1.4rem; }
+  }
+</style>
+<script>
+  // ── SUPABASE CONFIG (in head so all functions can use it) ──
+  const SUPABASE_URL = 'https://mmdtxhletzdmuwtiqppz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tZHR4aGxldHpkbXV3dGlxcHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNDg5MzgsImV4cCI6MjA4ODYyNDkzOH0.aMFeVOjU-osWmLjeDFD5QdAzqy7AJJPSn4-qnGUcZ8o';
+
+  async function sbFetch(path, method = 'GET', body = null) {
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+    return res.ok ? res.json() : null;
+  }
+
+  async function submitBooking() {
+    const fname = document.getElementById('book-fname').value.trim();
+    const lname = document.getElementById('book-lname').value.trim();
+    const phone = document.getElementById('book-phone').value.trim();
+    const email = document.getElementById('book-email').value.trim();
+    const address = document.getElementById('book-address').value.trim();
+    const brand = document.getElementById('book-brand').value;
+    const model = document.getElementById('book-model').value.trim();
+    const repair = document.getElementById('book-repair').value;
+    const date = document.getElementById('book-date').value;
+    const time = document.getElementById('book-time').value;
+    const desc = document.getElementById('book-desc').value.trim();
+    const btn = document.getElementById('bookingBtn');
+    const statusEl = document.getElementById('bookingStatus');
+
+    if (!fname || !phone) {
+      showToast('⚠️ Please fill in at least your name and phone number.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    statusEl.style.display = 'none';
+
+    try {
+      const payload = {
+        name: fname + ' ' + lname,
+        phone,
+        email: email || null,
+        device: (brand ? brand + ' ' : '') + model,
+        repair_type: repair || 'Not specified',
+        preferred_date: date || null,
+        preferred_time: time,
+        description: (address ? '📍 Location: ' + address + (desc ? '\n\n' + desc : '') : desc) || null,
+        status: 'pending'
+      };
+
+      // Direct fetch so we can see the real error
+      const rawRes = await fetch(SUPABASE_URL + '/rest/v1/bookings', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(payload)
+      });
+      const result = await rawRes.json();
+      console.log('Supabase response status:', rawRes.status);
+      console.log('Supabase response:', JSON.stringify(result));
+
+      if (rawRes.ok && result && result.length > 0) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(37,211,102,0.1)';
+        statusEl.style.border = '1px solid rgba(37,211,102,0.3)';
+        statusEl.style.color = '#25D366';
+        statusEl.textContent = '✅ Booking received! We will contact you shortly on ' + phone + ' to confirm.';
+        ['book-fname','book-lname','book-phone','book-email','book-address','book-model','book-date','book-desc'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        btn.textContent = 'Booking Sent ✓';
+        setTimeout(() => { btn.textContent = 'Confirm Booking →'; btn.disabled = false; }, 4000);
+      } else {
+        throw new Error('Failed');
+      }
+    } catch(e) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'rgba(255,107,43,0.08)';
+      statusEl.style.border = '1px solid rgba(255,107,43,0.3)';
+      statusEl.style.color = '#ff6b2b';
+      statusEl.textContent = '❌ Something went wrong. Please WhatsApp us on +260 778 817 000.';
+      btn.textContent = 'Confirm Booking →';
+      btn.disabled = false;
+    }
+  }
+
+  async function joinWaitlist() {
+    const email = document.getElementById('waitlistEmail').value.trim();
+    if (!email || !email.includes('@')) { showToast('⚠️ Please enter a valid email address.'); return; }
+    try {
+      await sbFetch('waitlist', 'POST', { email });
+      showToast("🎉 You're on the waitlist! We'll notify you when selling goes live.");
+      document.getElementById('waitlistEmail').value = '';
+    } catch(e) {
+      showToast("🎉 You're on the waitlist!");
+      document.getElementById('waitlistEmail').value = '';
+    }
+  }
+
+  // ── NAV & THEME (must be in head) ──
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const burger = document.getElementById('hamburger');
+    menu.classList.toggle('open');
+    burger.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+  function closeMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-mode');
+    const track = document.getElementById('themeTrack');
+    const label = document.getElementById('themeLabel');
+    const navBtn = document.getElementById('navThemeBtn');
+    if (track) track.classList.toggle('on', isLight);
+    if (label) label.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+    if (navBtn) navBtn.textContent = isLight ? '☀️' : '🌙';
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Lumin<span>Ous</span> Tech</div>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#booking">Book Repair</a></li>
+    <li><a href="#shop">Shop</a></li>
+    <li><a href="#sell">Sell Gadget</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="nav-theme-btn" onclick="toggleTheme()" id="navThemeBtn" title="Toggle theme">🌙</button>
+    <button class="nav-cta" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Book Now</button>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+
+  <!-- Nav Links -->
+  <div class="menu-links">
+    <a href="#services" onclick="closeMenu()">Services</a>
+    <a href="#booking" onclick="closeMenu()">Book Repair</a>
+    <a href="#shop" onclick="closeMenu()">Shop</a>
+    <a href="#sell" onclick="closeMenu()">Sell Gadget</a>
+    <a href="#testimonials" onclick="closeMenu()">Reviews</a>
+    <a href="#contact" onclick="closeMenu()">Contact</a>
+  </div>
+
+  <div class="menu-divider"></div>
+
+  <!-- Call & WhatsApp -->
+  <div class="menu-contact-btns">
+    <a class="menu-call-btn" href="tel:+260778817000">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.76a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Call Us
+    </a>
+    <a class="menu-wa-btn" href="https://wa.me/260778817000?text=Hi%20LuminOus%20Tech!" target="_blank" rel="noopener">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" fill="white"><path d="M16 2C8.28 2 2 8.28 2 16c0 2.46.66 4.88 1.92 7.02L2 30l7.18-1.88A13.93 13.93 0 0 0 16 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm6.29 19.43c-.34-.17-2.02-1-2.34-1.11-.31-.11-.54-.17-.77.17-.23.34-.88 1.11-1.08 1.34-.2.23-.4.26-.74.09-.34-.17-1.44-.53-2.75-1.7-1.02-.9-1.7-2.02-1.9-2.36-.2-.34-.02-.52.15-.69.15-.15.34-.4.51-.6.17-.2.23-.34.34-.57.11-.23.06-.43-.03-.6-.09-.17-.77-1.86-1.06-2.55-.28-.67-.56-.58-.77-.59h-.65c-.23 0-.6.09-.91.43-.31.34-1.2 1.17-1.2 2.86s1.23 3.32 1.4 3.55c.17.23 2.42 3.7 5.87 5.19.82.35 1.46.56 1.96.72.82.26 1.57.22 2.16.13.66-.1 2.02-.83 2.31-1.62.28-.8.28-1.48.2-1.62-.09-.14-.31-.23-.65-.4z"/></svg>
+      WhatsApp
+    </a>
+  </div>
+
+  <!-- Book Now CTA -->
+  <button class="mobile-cta" onclick="closeMenu(); document.getElementById('booking').scrollIntoView({behavior:'smooth'})">📱 Book a Repair</button>
+
+  <!-- Social Media -->
+  <div class="menu-socials">
+    <a class="menu-social-btn fb" href="https://facebook.com" target="_blank" rel="noopener" title="Facebook">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </a>
+    <a class="menu-social-btn ig" href="https://instagram.com" target="_blank" rel="noopener" title="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a class="menu-social-btn tk" href="https://tiktok.com" target="_blank" rel="noopener" title="TikTok">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+    </a>
+  </div>
+
+  <!-- Dark / Light Mode Toggle -->
+  <div class="menu-theme-toggle" onclick="toggleTheme()" id="themeToggle">
+    <div class="theme-track" id="themeTrack">
+      <div class="theme-thumb"></div>
+    </div>
+    <span id="themeLabel">Light Mode</span>
+  </div>
+
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">⚡ Fast Same-Day Repairs · Zambia's #1 Mobile Tech</div>
+    <h1>Fix. Buy. Sell.<br/><em>Stay Connected.</em></h1>
+    <p class="hero-sub">LuminOus Tech brings expert phone repairs to your door across Zambia. Buy quality gadgets or sell your old devices — fast, fair, and professional.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">📱 Book a Repair</button>
+      <button class="btn-secondary" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Browse Gadgets →</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">2,400+</div><div class="stat-label">Repairs Done</div></div>
+      <div><div class="stat-num">4.9★</div><div class="stat-label">Avg Rating</div></div>
+      <div><div class="stat-num">1hr</div><div class="stat-label">Avg Fix Time</div></div>
+      <div><div class="stat-num" id="viewCounter">—</div><div class="stat-label">Site Visitors</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="phone-circle">
+      <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+      <div class="orbit orbit-2"><div class="orbit-dot"></div></div>
+      <div class="phone-icon">📱</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header">
+    <div class="section-label">What We Fix</div>
+    <h2 class="section-title">Our Repair Services</h2>
+    <p class="section-sub">Professional, fast, and affordable. We come to you — no need to leave home.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🖥️</div>
+      <div class="service-name">Screen Replacement</div>
+      <div class="service-desc">Cracked or unresponsive display? We replace screens for all major brands on the spot.</div>
+
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔋</div>
+      <div class="service-name">Battery Replacement</div>
+      <div class="service-desc">Draining fast? We swap your battery with a genuine replacement in under 30 minutes.</div>
+
+    </div>
+    <div class="service-card">
+      <div class="service-icon">💧</div>
+      <div class="service-name">Water Damage Repair</div>
+      <div class="service-desc">Don't panic. We dry, clean, and restore water-damaged devices with precision tools.</div>
+
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔌</div>
+      <div class="service-name">Charging Port Fix</div>
+      <div class="service-desc">Won't charge? We diagnose and replace faulty ports for all phone models.</div>
+
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📸</div>
+      <div class="service-name">Camera Repair</div>
+      <div class="service-desc">Blurry or broken camera? We restore your lens and camera module to full quality.</div>
+
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔧</div>
+      <div class="service-name">General Diagnostics</div>
+      <div class="service-desc">Not sure what's wrong? We run a full diagnostic check and advise you on the best fix.</div>
+    </div>
+  </div>
+
+  <!-- SOFTWARE REPAIRS -->
+  <div class="section-header" style="margin-top:3.5rem; margin-bottom:2rem;">
+    <div class="section-label">Software Fixes</div>
+    <h3 class="section-title" style="font-size:clamp(1.4rem,2.5vw,2rem);">Software Repair Services</h3>
+    <p class="section-sub">No parts needed — we fix software problems remotely or on the spot, fast.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🔐</div>
+      <div class="service-name">Forgot Password / Unlock</div>
+      <div class="service-desc">Locked out of your phone or Apple/Google account? We recover access without wiping your data where possible.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔄</div>
+      <div class="service-name">Stuck on Boot / Bootloop</div>
+      <div class="service-desc">Phone stuck on the logo screen and won't start? We flash and restore your device back to working order.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">⬆️</div>
+      <div class="service-name">iOS / Android Upgrade</div>
+      <div class="service-desc">We safely update your operating system to the latest version, fixing bugs and improving performance.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🦠</div>
+      <div class="service-name">Virus & Malware Removal</div>
+      <div class="service-desc">Ads popping up, phone acting strange? We clean out malicious apps and secure your device.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">♻️</div>
+      <div class="service-name">Factory Reset & Data Backup</div>
+      <div class="service-desc">We back up your contacts, photos and apps, then do a clean reset — leaving your phone fresh and fast.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📲</div>
+      <div class="service-name">App & Setup Help</div>
+      <div class="service-desc">New phone? We transfer your data, set up your accounts and install your apps so you're ready to go.</div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="booking-wrap">
+    <div class="booking-info">
+      <div class="section-label">Book a Repair</div>
+      <h2 class="section-title">We Come To You</h2>
+      <p>Fill in the form and one of our technicians will arrive at your location at your chosen time. No queues, no hassle.</p>
+      <ul class="booking-perks">
+        <li><span class="perk-icon">✅</span> Same-day appointments available</li>
+        <li><span class="perk-icon">✅</span> In-home service — we come to you</li>
+        <li><span class="perk-icon">✅</span> Upfront pricing, no hidden fees</li>
+        <li><span class="perk-icon">✅</span> 90-day repair warranty included</li>
+        <li><span class="perk-icon">✅</span> All major brands supported</li>
+      </ul>
+    </div>
+    <div class="booking-form">
+      <div class="form-title">📅 Schedule a Repair</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="book-fname" placeholder="Chanda"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="book-lname" placeholder="Mwale"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="book-phone" placeholder="+260 77 000 0000"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:0.75rem;">(optional — for quote delivery)</span></label>
+        <input type="email" id="book-email" placeholder="chanda@email.com"/>
+      </div>
+      <div class="form-group">
+        <label>Your Location / Area</label>
+        <input type="text" id="book-address" placeholder="e.g. Woodlands, Lusaka"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Device Brand</label>
+          <select id="book-brand">
+            <option value="">-- Select Brand --</option>
+            <option value="Apple">Apple</option>
+            <option value="Samsung">Samsung</option>
+            <option value="Google">Google Pixel</option>
+            <option value="Techno">Techno</option>
+            <option value="Infinix">Infinix</option>
+            <option value="OnePlus">OnePlus</option>
+            <option value="Sony">Sony</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Model <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:0.75rem;">(if known)</span></label>
+          <input type="text" id="book-model" placeholder="e.g. iPhone 14, Galaxy A55..."/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Upload Device Photos <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:0.75rem;">(optional — helps us prepare)</span></label>
+        <div class="photo-upload" onclick="document.getElementById('book-photos').click()">
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text">Click to upload photos of the damage</div>
+          <div class="photo-upload-hint">Show us what's broken — JPG, PNG up to 10MB each</div>
+          <input type="file" id="book-photos" multiple accept="image/*" style="display:none" onchange="handlePhotoUpload(this,'book-preview')"/>
+        </div>
+        <div id="book-preview" class="photo-preview"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Repair Type</label>
+          <select id="book-repair">
+            <option value="">-- Select Repair Type --</option>
+            <optgroup label="— Hardware Repairs —">
+              <option>Screen Replacement</option>
+              <option>Battery Replacement</option>
+              <option>Water Damage Repair</option>
+              <option>Charging Port Fix</option>
+              <option>Camera Repair</option>
+              <option>General Diagnostics</option>
+            </optgroup>
+            <optgroup label="— Software Repairs —">
+              <option>Forgot Password / Unlock</option>
+              <option>Stuck on Boot / Bootloop Fix</option>
+              <option>iOS / Android Upgrade</option>
+              <option>Virus &amp; Malware Removal</option>
+              <option>Factory Reset &amp; Data Backup</option>
+              <option>App &amp; Setup Help</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Preferred Date</label>
+          <input type="date" id="book-date"/>
+        </div>
+        <div class="form-group">
+          <label>Preferred Time</label>
+          <select id="book-time">
+            <option>Morning (9am–12pm)</option>
+            <option>Afternoon (12pm–5pm)</option>
+            <option>Evening (5pm–8pm)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Describe the Issue</label>
+        <textarea id="book-desc" placeholder="Tell us what's happening with your device..."></textarea>
+      </div>
+      <button class="form-submit" id="bookingBtn" onclick="submitBooking()">Confirm Booking →</button>
+      <div id="bookingStatus" style="margin-top:1rem;padding:0.9rem 1.2rem;border-radius:10px;font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:600;display:none;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section id="shop">
+  <div class="section-header">
+    <div class="section-label">Our Store</div>
+    <h2 class="section-title">Buy Gadgets</h2>
+    <p class="section-sub">Explore our curated selection of refurbished and new electronics at unbeatable prices.</p>
+  </div>
+  <div class="shop-grid">
+    <div class="product-card">
+      <div class="product-img">📱</div>
+      <div class="product-info">
+        <div class="product-name">iPhone 14 Pro (Refurb)</div>
+        <div class="product-desc">128GB, Deep Purple. Grade A condition, 12-month warranty.</div>
+        <div class="product-footer">
+          <div class="product-price">K 17,523</div>
+          <button class="add-btn" onclick="showToast('Added to cart!')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">🤖</div>
+      <div class="product-info">
+        <div class="product-name">Samsung Galaxy S23</div>
+        <div class="product-desc">256GB, Phantom Black. Like new, full accessories included.</div>
+        <div class="product-footer">
+          <div class="product-price">K 16,173</div>
+          <button class="add-btn" onclick="showToast('Added to cart!')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">🎧</div>
+      <div class="product-info">
+        <div class="product-name">AirPods Pro (Gen 2)</div>
+        <div class="product-desc">Active noise cancellation, MagSafe charging case. Sealed box.</div>
+        <div class="product-footer">
+          <div class="product-price">K 5,103</div>
+          <button class="add-btn" onclick="showToast('Added to cart!')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">⌚</div>
+      <div class="product-info">
+        <div class="product-name">Apple Watch Series 8</div>
+        <div class="product-desc">45mm, Midnight Aluminum. GPS model, refurbished Grade A.</div>
+        <div class="product-footer">
+          <div class="product-price">K 7,533</div>
+          <button class="add-btn" onclick="showToast('Added to cart!')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">💻</div>
+      <div class="product-info">
+        <div class="product-name">iPad Air 5th Gen</div>
+        <div class="product-desc">64GB WiFi, Blue. M1 chip, perfect screen, full warranty.</div>
+        <div class="product-footer">
+          <div class="product-price">K 12,393</div>
+          <button class="add-btn" onclick="showToast('Added to cart!')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">🔌</div>
+      <div class="product-info">
+        <div class="product-name">65W Fast Charger Bundle</div>
+        <div class="product-desc">USB-C GaN charger + braided cable. Works with all devices.</div>
+        <div class="product-footer">
+          <div class="product-price">K 918</div>
+          <button class="add-btn" onclick="showToast('Added to cart!')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SELL GADGET -->
+<section id="sell">
+  <div class="sell-wrap">
+    <div>
+      <div class="section-label">Turn Tech Into Cash</div>
+      <h2 class="section-title">Sell Your Gadget</h2>
+      <p class="section-sub" style="margin-bottom:2rem;">Got an old phone or device lying around? We'll give you a fair quote and fast payment.</p>
+      <div class="sell-steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-text">
+            <h4>Submit Your Device</h4>
+            <p>Fill in the form with your device details and condition. Takes less than 2 minutes.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-text">
+            <h4>Get a Quote</h4>
+            <p>We'll review your submission and send you a fair offer within the hour.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-text">
+            <h4>We Collect & Pay</h4>
+            <p>Accept the offer and we'll collect the device from your door. Payment same day.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sell-form-wrap">
+
+      <!-- COMING SOON OVERLAY -->
+      <div class="coming-soon-overlay">
+        <div class="cs-badge">Coming Soon</div>
+        <div class="cs-title">Sell Your Gadget<br/>Is Launching Soon</div>
+        <p class="cs-sub">We're setting up fast & fair payouts. Be the first to know when we go live — join the waitlist.</p>
+        <div class="cs-divider"></div>
+        <div class="cs-waitlist-label">🔔 Notify Me When Live</div>
+        <div class="cs-input-row">
+          <input class="cs-input" type="email" placeholder="your@email.com" id="waitlistEmail"/>
+          <button class="cs-btn" onclick="joinWaitlist()">Notify Me</button>
+        </div>
+        <p class="cs-note">No spam. We'll only message you when it's ready.</p>
+      </div>
+
+      <!-- BLURRED FORM BEHIND OVERLAY -->
+      <div class="sell-form">
+        <div class="form-title">💰 Get a Quote</div>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" placeholder="Jane Doe" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Contact Number</label>
+          <input type="tel" placeholder="+260 778 817 000" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Device Type</label>
+          <select disabled>
+            <option>Smartphone</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Device Condition</label>
+          <select disabled>
+            <option>Like New – no scratches</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Additional Notes</label>
+          <textarea placeholder="Any accessories included? Original box? Unlocked?" disabled></textarea>
+        </div>
+        <button class="form-submit" disabled>Request a Quote →</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-header">
+    <div class="section-label">Happy Customers</div>
+    <h2 class="section-title">What People Say</h2>
+    <p class="section-sub">Real reviews from real customers who trust LuminOus Tech.</p>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"Came to my home and fixed my iPhone screen in under an hour. Couldn't believe how fast and affordable it was. Highly recommend!"</div>
+      <div class="testi-author">
+        <div class="author-avatar">SK</div>
+        <div><div class="author-name">Sarah K.</div><div class="author-loc">Lusaka, Zambia</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"Sold my old Galaxy S21 through them and got a great price. Process was smooth, they picked it up the same day. Will use again!"</div>
+      <div class="testi-author">
+        <div class="author-avatar">MR</div>
+        <div><div class="author-name">Marcus R.</div><div class="author-loc">Lusaka, Zambia</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"Dropped my phone in water and panicked. LuminOus Tech came out within 2 hours and saved my phone. Absolute lifesavers."</div>
+      <div class="testi-author">
+        <div class="author-avatar">AP</div>
+        <div><div class="author-name">Aisha P.</div><div class="author-loc">Lusaka, Zambia</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"Bought a refurbished iPad from their store. Works perfectly, delivery was quick, and the price was way better than buying new."</div>
+      <div class="testi-author">
+        <div class="author-avatar">DL</div>
+        <div><div class="author-name">Daniel L.</div><div class="author-loc">Lusaka, Zambia</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"Super professional technician, explained everything clearly. My battery was swapped in 25 minutes. Fantastic service!"</div>
+      <div class="testi-author">
+        <div class="author-avatar">TC</div>
+        <div><div class="author-name">Tanya C.</div><div class="author-loc">Lusaka, Zambia</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★☆</div>
+      <div class="testi-text">"Great experience, fair quote, quick collection. Would have liked a slightly faster response but overall excellent service!"</div>
+      <div class="testi-author">
+        <div class="author-avatar">JM</div>
+        <div><div class="author-name">James M.</div><div class="author-loc">Lusaka, Zambia</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW SUBMISSION FORM -->
+  <div class="review-form-wrap">
+    <div class="review-form-title">⭐ Leave a Review</div>
+    <p class="review-form-sub">Had a great experience? Tell others about it — your review goes live instantly after a quick check.</p>
+
+    <!-- Star Picker -->
+    <div class="star-picker" id="starPicker">
+      <span onclick="setRating(1)">★</span>
+      <span onclick="setRating(2)">★</span>
+      <span onclick="setRating(3)">★</span>
+      <span onclick="setRating(4)">★</span>
+      <span onclick="setRating(5)">★</span>
+    </div>
+
+    <div class="review-row">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="reviewName" placeholder="e.g. Chanda M."/>
+      </div>
+      <div class="form-group">
+        <label>Your Location</label>
+        <input type="text" id="reviewLocation" placeholder="e.g. Lusaka, Zambia"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Your Review</label>
+      <textarea id="reviewText" placeholder="Tell others about your experience with LuminOus Tech..." style="min-height:100px"></textarea>
+    </div>
+
+    <button class="form-submit" onclick="submitReview()" id="reviewSubmitBtn">Submit Review →</button>
+
+    <div class="review-status" id="reviewStatus">
+      <div class="spinner" id="reviewSpinner"></div>
+      <span id="reviewStatusMsg">Checking your review...</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header">
+    <div class="section-label">Get In Touch</div>
+    <h2 class="section-title">Contact Us</h2>
+    <p class="section-sub">Questions? We're here and happy to help.</p>
+  </div>
+  <div class="contact-wrap">
+    <div>
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-icon">📞</div>
+          <div class="contact-text">
+            <h4>Phone / Call</h4>
+            <p>+260 778 817 000</p>
+            <p>Mon–Sat, 8am–7pm</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📧</div>
+          <div class="contact-text">
+            <h4>Email</h4>
+            <p>hello@luminoustech.zm</p>
+            <p>We reply within 1 hour</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div class="contact-text">
+            <h4>Service Area</h4>
+            <p>Lusaka & surrounding areas</p>
+            <p>In-home visits available</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">💬</div>
+          <div class="contact-text">
+            <h4>WhatsApp (Fastest)</h4>
+            <p>+260 778 817 000</p>
+            <p>Quick quotes & bookings</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="map-placeholder">
+        <div class="map-icon">🗺️</div>
+        <div style="color:var(--muted);font-size:0.9rem;text-align:center;">
+          <strong style="color:var(--text);">Based in Lusaka, Zambia</strong><br/>
+          Serving Lusaka, Kitwe, Ndola & surrounding areas.<br/>
+          <span style="color:var(--accent);font-size:0.8rem;">📍 Add your Google Maps embed here</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Lumin<span>Ous</span> Tech</div>
+  <div class="footer-links">
+    <a href="#services">Services</a>
+    <a href="#booking">Book Repair</a>
+    <a href="#shop">Shop</a>
+    <a href="#sell">Sell Gadget</a>
+    <a href="#testimonials">Reviews</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 LuminOus Tech. Lusaka, Zambia. All rights reserved.</div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a class="wa-float" href="https://wa.me/260778817000?text=Hi%20LuminOus%20Tech!%20I%20need%20help%20with%20my%20device." target="_blank" rel="noopener" title="Chat on WhatsApp">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="30" height="30" fill="white">
+    <path d="M16 2C8.28 2 2 8.28 2 16c0 2.46.66 4.88 1.92 7.02L2 30l7.18-1.88A13.93 13.93 0 0 0 16 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm0 25.5a11.46 11.46 0 0 1-5.84-1.6l-.42-.25-4.26 1.12 1.13-4.15-.28-.44A11.47 11.47 0 0 1 4.5 16C4.5 9.6 9.6 4.5 16 4.5S27.5 9.6 27.5 16 22.4 27.5 16 27.5zm6.29-8.57c-.34-.17-2.02-1-2.34-1.11-.31-.11-.54-.17-.77.17-.23.34-.88 1.11-1.08 1.34-.2.23-.4.26-.74.09-.34-.17-1.44-.53-2.75-1.7-1.02-.9-1.7-2.02-1.9-2.36-.2-.34-.02-.52.15-.69.15-.15.34-.4.51-.6.17-.2.23-.34.34-.57.11-.23.06-.43-.03-.6-.09-.17-.77-1.86-1.06-2.55-.28-.67-.56-.58-.77-.59h-.65c-.23 0-.6.09-.91.43-.31.34-1.2 1.17-1.2 2.86s1.23 3.32 1.4 3.55c.17.23 2.42 3.7 5.87 5.19.82.35 1.46.56 1.96.72.82.26 1.57.22 2.16.13.66-.1 2.02-.83 2.31-1.62.28-.8.28-1.48.2-1.62-.09-.14-.31-.23-.65-.4z"/>
+  </svg>
+</a>
+<div class="wa-tooltip">Chat on WhatsApp</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── SUPABASE CONFIG & sbFetch defined in <head> ──
+
+  // ══════════════════════════════════════════
+  // PAGE VIEW COUNTER
+  // ══════════════════════════════════════════
+  async function trackPageView() {
+    try {
+      // Read current count first
+      const res = await fetch(SUPABASE_URL + '/rest/v1/page_views?id=eq.1&select=total_views', {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+      const data = await res.json();
+      const currentViews = (data && data[0]) ? Number(data[0].total_views) : 0;
+      const newViews = currentViews + 1;
+
+      // Update with new count
+      await fetch(SUPABASE_URL + '/rest/v1/page_views?id=eq.1', {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ total_views: newViews })
+      });
+
+      // Show on page
+      const el = document.getElementById('viewCounter');
+      if (el) el.textContent = newViews.toLocaleString() + '+';
+    } catch(e) { console.log('View counter error', e); }
+  }
+
+  // submitBooking & joinWaitlist defined in <head>
+
+    // ══════════════════════════════════════════
+  // STAR RATING
+  // ══════════════════════════════════════════
+  let selectedRating = 0;
+  function setRating(val) {
+    selectedRating = val;
+    document.querySelectorAll('#starPicker span').forEach((s, i) => {
+      s.classList.toggle('active', i < val);
+    });
+  }
+
+  // ══════════════════════════════════════════
+  // LOAD REVIEWS FROM SUPABASE
+  // ══════════════════════════════════════════
+  async function loadReviews() {
+    try {
+      const data = await sbFetch('reviews?select=*&approved=eq.true&order=created_at.desc&limit=10');
+      if (data && data.length > 0) {
+        const grid = document.querySelector('.testi-grid');
+        // Keep existing hardcoded reviews, prepend DB ones
+        data.forEach(r => addReviewToGrid(r.name, r.location, r.rating, r.review_text, false));
+      }
+    } catch(e) { console.log('Could not load reviews', e); }
+  }
+
+  // ══════════════════════════════════════════
+  // AI REVIEW → SUPABASE
+  // ══════════════════════════════════════════
+  async function submitReview() {
+    const name = document.getElementById('reviewName').value.trim();
+    const location = document.getElementById('reviewLocation').value.trim();
+    const text = document.getElementById('reviewText').value.trim();
+    const status = document.getElementById('reviewStatus');
+    const statusMsg = document.getElementById('reviewStatusMsg');
+    const spinner = document.getElementById('reviewSpinner');
+    const btn = document.getElementById('reviewSubmitBtn');
+
+    if (!name || !text || selectedRating === 0) { showToast('⚠️ Please fill in your name, rating and review.'); return; }
+    if (text.length < 20) { showToast('⚠️ Please write a bit more — at least 20 characters.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Checking...';
+    status.className = 'review-status checking';
+    spinner.style.display = 'block';
+    statusMsg.textContent = 'AI is reviewing your submission...';
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+          messages: [{ role: 'user', content: `You are a review moderator for LuminOus Tech, a phone repair business in Lusaka, Zambia. Evaluate this customer review and respond with ONLY valid JSON: {"approved": true/false, "reason": "brief reason", "cleaned_text": "cleaned review text"}. Name: ${name}. Rating: ${selectedRating}/5. Review: "${text}". Approve if genuine, relevant to phone/tech repair, respectful. Reject if spam, fake, offensive, or gibberish.` }]
+        })
+      });
+      const data = await response.json();
+      const raw = data.content[0].text.replace(/\`\`\`json|\`\`\`/g, '').trim();
+      const result = JSON.parse(raw);
+
+      if (result.approved) {
+        // Save to Supabase
+        await sbFetch('reviews', 'POST', {
+          name, location: location || 'Lusaka, Zambia',
+          rating: selectedRating, review_text: result.cleaned_text, approved: true
+        });
+        addReviewToGrid(name, location || 'Lusaka, Zambia', selectedRating, result.cleaned_text, true);
+        status.className = 'review-status approved';
+        spinner.style.display = 'none';
+        statusMsg.textContent = '✅ Your review is live! Thank you for the feedback.';
+        document.getElementById('reviewName').value = '';
+        document.getElementById('reviewLocation').value = '';
+        document.getElementById('reviewText').value = '';
+        setRating(0); btn.textContent = 'Submit Review →'; btn.disabled = false;
+      } else {
+        status.className = 'review-status rejected'; spinner.style.display = 'none';
+        statusMsg.textContent = '❌ ' + (result.reason || 'Review could not be approved.');
+        btn.textContent = 'Submit Review →'; btn.disabled = false;
+      }
+    } catch(err) {
+      status.className = 'review-status rejected'; spinner.style.display = 'none';
+      statusMsg.textContent = '❌ Something went wrong. Please try again.';
+      btn.textContent = 'Submit Review →'; btn.disabled = false;
+    }
+  }
+
+  function addReviewToGrid(name, location, rating, text, animate = true) {
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    const card = document.createElement('div');
+    card.className = 'testi-card';
+    if (animate) { card.style.opacity = '0'; card.style.transform = 'translateY(20px)'; card.style.transition = 'opacity 0.5s ease, transform 0.5s ease'; }
+    card.innerHTML = `<div class="stars">${stars}</div><div class="testi-text">"${text}"</div><div class="testi-author"><div class="author-avatar">${initials}</div><div><div class="author-name">${name}</div><div class="author-loc">${location}</div></div></div>`;
+    document.querySelector('.testi-grid').prepend(card);
+    if (animate) requestAnimationFrame(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; });
+  }
+
+  // ══════════════════════════════════════════
+  // PHOTO UPLOAD
+  // ══════════════════════════════════════════
+  function handlePhotoUpload(input, previewId) {
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result; img.className = 'photo-thumb'; img.title = file.name;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ══════════════════════════════════════════
+  // TOAST — also in <head> but redefined here for safety
+  // ══════════════════════════════════════════
+  function showToastBottom(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ══════════════════════════════════════════
+  // SCROLL ANIMATIONS + INIT
+  // ══════════════════════════════════════════
+  document.addEventListener('DOMContentLoaded', function () {
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.service-card, .product-card, .testi-card, .step, .contact-item').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  });
+</script>
+</body>
+</html>
