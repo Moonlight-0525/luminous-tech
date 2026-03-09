@@ -699,7 +699,7 @@
         <td>
           <div class="booking-name">${esc(b.name || '—')}</div>
           <div class="booking-phone">${esc(b.phone || '—')}</div>
-          ${b.description && b.description.includes('📍') ? `<div class="booking-device" style="color:var(--accent)">${esc(b.description.split('\n')[0])}</div>` : ''}
+          ${b.notes ? `<div class="booking-device" style="color:var(--accent)">📍 ${esc(b.notes)}</div>` : ''}
         </td>
         <td>
           <div style="font-weight:600;font-size:0.85rem;">${esc(b.repair_type || '—')}</div>
@@ -738,7 +738,8 @@
         <div class="detail-item"><div class="detail-item-label">Repair Type</div><div class="detail-item-value">${esc(b.repair_type || '—')}</div></div>
         <div class="detail-item"><div class="detail-item-label">Preferred Date</div><div class="detail-item-value">${esc(b.preferred_date || '—')}</div></div>
         <div class="detail-item"><div class="detail-item-label">Preferred Time</div><div class="detail-item-value">${esc(b.preferred_time || '—')}</div></div>
-        ${b.description ? `<div class="detail-item full"><div class="detail-item-label">📍 Location & Description</div><div class="detail-item-value" style="white-space:pre-line">${esc(b.description)}</div></div>` : ''}
+        ${b.notes ? `<div class="detail-item full"><div class="detail-item-label">📍 Location</div><div class="detail-item-value">${esc(b.notes)}</div></div>` : ''}
+        ${b.description ? `<div class="detail-item full"><div class="detail-item-label">🔧 Issue Description</div><div class="detail-item-value">${esc(b.description)}</div></div>` : ''}
         ${b.notes ? `<div class="detail-item full"><div class="detail-item-label">Internal Notes</div><div class="detail-item-value">${esc(b.notes)}</div></div>` : ''}
         <div class="detail-item full"><div class="detail-item-label">Submitted</div><div class="detail-item-value" style="font-family:var(--mono);font-size:0.8rem">${new Date(b.created_at).toLocaleString()}</div></div>
       </div>
