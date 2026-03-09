@@ -966,7 +966,8 @@
         repair_type: repair || 'Not specified',
         preferred_date: date || null,
         preferred_time: time,
-        description: (address ? '📍 Location: ' + address + (desc ? '\n\n' + desc : '') : desc) || null,
+        description: desc || null,
+        notes: address || null,
         status: 'pending'
       };
 
