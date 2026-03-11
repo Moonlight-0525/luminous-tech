@@ -402,19 +402,22 @@
 ══════════════════════════════════════════ -->
 <script src="../assets/js/supabase.js"></script>
 <script src="../assets/js/utils.js"></script>
-<script src="../assets/js/auth.js"></script>
 <script src="../assets/js/bookings.js"></script>
 <script src="../assets/js/inventory.js"></script>
 <script src="../assets/js/customers.js"></script>
 <script src="../assets/js/analytics.js"></script>
+<script src="../assets/js/auth.js"></script>
 
 <script>
   // ── INIT ──
-  checkAuth();
-  setInterval(() => {
-    const el = document.getElementById('liveClock');
-    if (el) el.textContent = new Date().toLocaleTimeString('en-ZM');
-  }, 1000);
+  // Wait for full page load before checking auth
+  window.addEventListener('load', () => {
+    checkAuth();
+    setInterval(() => {
+      const el = document.getElementById('liveClock');
+      if (el) el.textContent = new Date().toLocaleTimeString('en-ZM');
+    }, 1000);
+  });
 
   // ── PAGES ──
   function showPage(name, el) {
@@ -423,7 +426,6 @@
     document.getElementById('pageTitle').textContent =
       name.charAt(0).toUpperCase() + name.slice(1);
 
-    // update nav active states
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
     const bn = document.getElementById('bn-' + name);
@@ -431,12 +433,11 @@
     if (bn) bn.classList.add('active');
     if (sb) sb.classList.add('active');
 
-    // load page data
-    if (name === 'dashboard')  { loadDashboard();  }
-    if (name === 'bookings')   { loadBookings();   }
-    if (name === 'inventory')  { loadInventory();  }
-    if (name === 'customers')  { loadCustomers();  }
-    if (name === 'analytics')  { loadAnalytics();  }
+    if (name === 'dashboard')  loadDashboard();
+    if (name === 'bookings')   loadBookings();
+    if (name === 'inventory')  loadInventory();
+    if (name === 'customers')  loadCustomers();
+    if (name === 'analytics')  loadAnalytics();
   }
 
   // ── MODALS ──
@@ -447,10 +448,11 @@
     document.getElementById(id).classList.remove('active');
   }
 
-  // close modal on overlay click
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) overlay.classList.remove('active');
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) overlay.classList.remove('active');
+      });
     });
   });
 </script>
