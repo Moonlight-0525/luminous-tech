@@ -541,23 +541,27 @@
   .bottom-nav { display: none; }
 
   .admin-sidebar {
-     display: none;
-  flex-direction: column;
-  width: 240px;
-  min-height: 100vh;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 1.5rem 1rem;
-  position: fixed;
-  left: 0;
-  top: 0;
-  gap: 0.25rem;
+      display: flex !important;
+    flex-direction: column;
+    width: 240px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 1rem;
+    position: fixed;
+    left: 0;
+    top: 0;
+    gap: 0.25rem;
   }
 
-  .admin-main {
-    margin-left: 240px;
-    padding: 1.5rem;
-  }
+    .admin-main { margin-left: 240px; padding: 1.5rem; }
+  .stats-grid { grid-template-columns: repeat(4, 1fr); padding: 0; margin-bottom: 1.5rem; }
+  .bookings-list { padding: 0; }
+  .search-bar    { padding: 0 0 1rem; }
+  .filter-tabs   { padding: 0 0 1rem; }
+  .section-header{ padding: 0 0 0.75rem; }
+  .inventory-grid{ padding: 0; grid-template-columns: repeat(3, 1fr); }
+  
 
   .stats-grid {
     grid-template-columns: repeat(4, 1fr);
