@@ -119,6 +119,14 @@ function renderBookingCards(bookings, containerId) {
           onclick="sendWhatsApp('${b.phone}','Hi ${esc(b.name)}! 👋 This is LuminOus Tech following up on your repair booking.')">
           💬 WhatsApp
         </button>
+        ${b.status === 'quoted' ? `
+        <button class="btn btn-secondary btn-sm" onclick="updateStatus('${b.id}','accepted')">
+          👍 Accepted
+        </button>` : ''}
+        ${b.status === 'accepted' ? `
+        <button class="btn btn-secondary btn-sm" onclick="updateStatus('${b.id}','paid')">
+          💰 Paid
+        </button>` : ''}
         ${b.status === 'pending' || b.status === 'accepted' ? `
         <button class="btn btn-primary btn-sm" onclick="openQuoteModal('${b.id}')">
           Quote →
@@ -292,17 +300,19 @@ async function submitQuote() {
       showToast('✅ Quote saved!');
       closeModal('quoteModal');
 
-      const name   = document.getElementById('q-name').value;
-      const device = document.getElementById('q-device').value;
-      const issue  = document.getElementById('q-issue').value;
-      const notes  = document.getElementById('q-notes').value;
-      const valid  = document.getElementById('q-valid').value;
-      const phone  = document.getElementById('q-phone').value;
-      const email  = document.getElementById('q-email').value;
-      const via    = document.querySelector('input[name="sendVia"]:checked').value;
+      const name    = document.getElementById('q-name').value;
+      const device  = document.getElementById('q-device').value;
+      const issue   = document.getElementById('q-issue').value;
+      const notes   = document.getElementById('q-notes').value;
+      const valid   = document.getElementById('q-valid').value;
+      const phone   = document.getElementById('q-phone').value;
+      const email   = document.getElementById('q-email').value;
+      const via     = document.querySelector('input[name="sendVia"]:checked').value;
       const baseURL = window.location.origin;
       const confirmLink = `${baseURL}/public/confirm.html?id=${bookingId}`;
-      const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: ${formatMoney(customerTotal)}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\n👉 *Confirm your repair here:*\n${confirmLink}\n\nOr simply reply *YES* to confirm.\n\n— LuminOus Tech 🇿🇲`;      setTimeout(() => {
+      const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: ${formatMoney(customerTotal)}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\n👉 *Confirm your repair here:*\n${confirmLink}\n\nOr simply reply *YES* to confirm.\n\n— LuminOus Tech 🇿🇲`;
+
+      setTimeout(() => {
         if (via === 'whatsapp') {
           sendWhatsApp(phone, msg);
         } else {
@@ -328,6 +338,7 @@ async function updateStatus(id, status) {
       headers: { ...HEADERS, 'Prefer': 'return=minimal' },
       body: JSON.stringify({ status })
     });
+
     const idx = allBookings.findIndex(b => b.id === id);
     if (idx > -1) allBookings[idx].status = status;
     showToast('✅ Status updated to ' + status);
@@ -336,14 +347,11 @@ async function updateStatus(id, status) {
     if (status === 'completed') {
       const b = allBookings.find(x => x.id === id);
       if (b && b.phone) {
-        const firstName   = (b.name || 'there').split(' ')[0];
-        const baseURL     = window.location.origin;
-        const reviewLink  = `${baseURL}/public/review.html?id=${id}`;
+        const firstName  = (b.name || 'there').split(' ')[0];
+        const baseURL    = window.location.origin;
+        const reviewLink = `${baseURL}/public/review.html?id=${id}`;
         const msg = `Hi ${firstName}! 🎉\n\nYour *${b.repair_type}* on your *${b.device}* is complete!\n\nWe hope everything is working perfectly. We'd love to hear your feedback:\n\n⭐ *Leave a quick review here:*\n${reviewLink}\n\nThank you for choosing LuminOus Tech! 🇿🇲`;
-
-        setTimeout(() => {
-          sendWhatsApp(b.phone, msg);
-        }, 500);
+        setTimeout(() => sendWhatsApp(b.phone, msg), 500);
       }
     }
 
@@ -352,18 +360,4 @@ async function updateStatus(id, status) {
   } catch (e) {
     showToast('Failed to update status', 'error');
   }
-}  
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ status })
-    });
-    const idx = allBookings.findIndex(b => b.id === id);
-    if (idx > -1) allBookings[idx].status = status;
-    showToast('✅ Status updated to ' + status);
-    applyFilter();
-    loadDashboard();
-  } catch (e) {
-    showToast('Failed to update status', 'error');
-  }
+}
