@@ -7,7 +7,7 @@
   flex-direction: column;
   min-height: 100vh;
   background: var(--bg);
-  padding-bottom: 80px; /* space for bottom nav */
+  padding-bottom: 120px; /* space for bottom nav */
 }
 
 /* ── TOP BAR ── */
