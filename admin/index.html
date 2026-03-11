@@ -152,11 +152,11 @@
 
     <!-- ── INVENTORY PAGE ── -->
     <div id="page-inventory" class="admin-page" style="display:none;">
-      <div class="section-header" style="padding:1rem 1.25rem 0.75rem;">
-        <div class="section-title">Parts Inventory</div>
-        <button class="btn btn-primary btn-sm" onclick="openAddPartModal()">+ Add Part</button>
-      </div>
-      <div class="inventory-grid" id="inventoryGrid">
+      <div style="position:sticky;top:65px;z-index:50;background:var(--bg);padding:0.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+  <div class="section-title">Parts Inventory</div>
+  <button class="btn btn-primary btn-sm" onclick="openAddPartModal()">+ Add Part</button>
+</div>
+<div class="inventory-grid" id="inventoryGrid" style="margin-top:0.75rem;">
         <div class="flex-center" style="padding:2rem;grid-column:1/-1;">
           <div class="spinner"></div>
         </div>
