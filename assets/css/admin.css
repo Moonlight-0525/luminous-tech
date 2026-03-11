@@ -541,17 +541,17 @@
   .bottom-nav { display: none; }
 
   .admin-sidebar {
-    display: flex;
-    flex-direction: column;
-    width: 240px;
-    min-height: 100vh;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 1.5rem 1rem;
-    position: fixed;
-    left: 0;
-    top: 0;
-    gap: 0.25rem;
+     display: none;
+  flex-direction: column;
+  width: 240px;
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 1rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  gap: 0.25rem;
   }
 
   .admin-main {
