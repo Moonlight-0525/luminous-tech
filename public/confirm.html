@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirm Your Repair — LuminOus Tech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0a0a0f;
+      --surface: #111118;
+      --surface2:#1a1a24;
+      --border:  rgba(255,255,255,0.07);
+      --text:    #f0f0f5;
+      --muted:   #6b7280;
+      --accent:  #00c8ff;
+      --green:   #10b981;
+      --yellow:  #f59e0b;
+      --red:     #ef4444;
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .logo {
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: var(--text);
+    }
+
+    .logo span { color: var(--accent); }
+
+    .logo-sub {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── STATES ── */
+    .state { display: none; flex-direction: column; gap: 1.25rem; }
+    .state.active { display: flex; }
+
+    /* ── LOADING ── */
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 1rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── DETAIL GRID ── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .detail-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+    }
+
+    .detail-item.full { grid-column: 1 / -1; }
+
+    .detail-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── PRICE BOX ── */
+    .price-box {
+      background: linear-gradient(135deg, rgba(0,200,255,0.1), rgba(124,58,237,0.1));
+      border: 1px solid rgba(0,200,255,0.25);
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .price-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .price-amount {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .price-valid {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 1rem;
+      border-radius: 14px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-confirm {
+      background: var(--green);
+      color: #fff;
+      font-size: 1.1rem;
+      padding: 1.1rem;
+    }
+
+    .btn-confirm:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-wa {
+      background: #25D366;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-icon {
+      text-align: center;
+      font-size: 4rem;
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(0); opacity: 0; }
+      70%  { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-align: center;
+      color: var(--green);
+    }
+
+    .success-msg {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── ERROR STATE ── */
+    .error-icon {
+      text-align: center;
+      font-size: 3rem;
+    }
+
+    .error-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--red);
+    }
+
+    .error-msg {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* ── ALREADY CONFIRMED ── */
+    .already-icon {
+      text-align: center;
+      font-size: 3rem;
+    }
+
+    .already-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--yellow);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- LOGO -->
+  <div>
+    <div class="logo">Lumin<span>Ous</span> Tech</div>
+    <div class="logo-sub">Lusaka's Trusted Phone Repair 🇿🇲</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LOADING STATE -->
+  <div class="state active" id="state-loading">
+    <div class="spinner"></div>
+    <p style="text-align:center;font-size:0.85rem;color:var(--muted);">Loading your booking...</p>
+  </div>
+
+  <!-- BOOKING DETAILS STATE -->
+  <div class="state" id="state-details">
+    <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text);">
+      Hi <span id="customer-name">there</span>! 👋
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-0.5rem;">
+      Here are the details of your repair quote. Please review and confirm below.
+    </p>
+
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Device</div>
+        <div class="detail-value" id="detail-device">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Repair</div>
+        <div class="detail-value" id="detail-repair">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Date</div>
+        <div class="detail-value" id="detail-date">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Time</div>
+        <div class="detail-value" id="detail-time">—</div>
+      </div>
+      <div class="detail-item full" id="detail-location-wrap" style="display:none;">
+        <div class="detail-label">📍 Your Location</div>
+        <div class="detail-value" id="detail-location">—</div>
+      </div>
+    </div>
+
+    <div class="price-box">
+      <div class="price-label">Your Quote</div>
+      <div class="price-amount" id="detail-price">K 0</div>
+      <div class="price-valid" id="detail-valid"></div>
+    </div>
+
+    <div id="detail-notes-wrap" style="display:none;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;">
+        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.3rem;">Note from LuminOus Tech</div>
+        <div style="font-size:0.875rem;color:var(--text);" id="detail-notes"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-confirm" id="confirmBtn" onclick="confirmBooking()">
+      ✅ Yes, Confirm My Repair
+    </button>
+
+    <button class="btn btn-secondary" onclick="contactUs()">
+      💬 I have a question
+    </button>
+
+    <p class="footer-note">
+      By confirming you agree to our technician visiting your location at the stated time.
+    </p>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div class="state" id="state-success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Repair Confirmed!</div>
+    <div class="success-msg">
+      Your repair has been confirmed. Our technician will contact you shortly to
+      arrange everything. Thank you for choosing LuminOus Tech! 🇿🇲
+    </div>
+    <button class="btn btn-wa" onclick="contactUs()">
+      💬 Chat with us on WhatsApp
+    </button>
+  </div>
+
+  <!-- ALREADY CONFIRMED STATE -->
+  <div class="state" id="state-already">
+    <div class="already-icon">⚡</div>
+    <div class="already-title">Already Confirmed!</div>
+    <div class="success-msg">
+      This booking has already been confirmed. Our technician will be in touch soon.
+    </div>
+    <button class="btn btn-wa" onclick="contactUs()">
+      💬 Chat with us on WhatsApp
+    </button>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="state" id="state-error">
+    <div class="error-icon">😕</div>
+    <div class="error-title">Booking Not Found</div>
+    <div class="error-msg">
+      This link may have expired or is invalid. Please contact us directly on WhatsApp.
+    </div>
+    <button class="btn btn-wa" onclick="contactUs()">
+      💬 Contact LuminOus Tech
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://mmdtxhletzdmuwtiqppz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tZHR4aGxldHpkbXV3dGlxcHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNDg5MzgsImV4cCI6MjA4ODYyNDkzOH0.aMFeVOjU-osWmLjeDFD5QdAzqy7AJJPSn4-qnGUcZ8o';
+  const HEADERS = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+
+  const BUSINESS_PHONE = '260778817000';
+  let booking = null;
+  let quotation = null;
+
+  // ── SHOW STATE ──
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+
+  // ── FORMAT MONEY ──
+  function formatMoney(amount) {
+    return 'K ' + Number(amount).toLocaleString();
+  }
+
+  // ── FORMAT DATE ──
+  function formatDate(str) {
+    if (!str) return '—';
+    return new Date(str).toLocaleDateString('en-ZM', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+  }
+
+  // ── CONTACT US ──
+  function contactUs() {
+    const name = booking ? booking.name : 'there';
+    const msg  = `Hi LuminOus Tech! 👋 I'm ${name} and I have a question about my repair booking.`;
+    window.open('https://wa.me/' + BUSINESS_PHONE + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  // ── LOAD BOOKING ──
+  async function loadBooking() {
+    const params = new URLSearchParams(window.location.search);
+    const id     = params.get('id');
+
+    if (!id) { showState('error'); return; }
+
+    try {
+      // load booking
+      const bRes  = await fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}&select=*`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const bData = await bRes.json();
+
+      if (!bData || !bData.length) { showState('error'); return; }
+      booking = bData[0];
+
+      // already confirmed or beyond quoted
+      if (['accepted','paid','completed'].includes(booking.status)) {
+        showState('already');
+        return;
+      }
+
+      // load latest quotation for this booking
+      const qRes  = await fetch(
+        `${SUPABASE_URL}/rest/v1/quotations?booking_id=eq.${id}&order=created_at.desc&limit=1&select=*`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const qData = await qRes.json();
+      quotation   = qData && qData.length ? qData[0] : null;
+
+      // populate UI
+      const firstName = (booking.name || '').split(' ')[0];
+      document.getElementById('customer-name').textContent  = firstName;
+      document.getElementById('detail-device').textContent  = booking.device || '—';
+      document.getElementById('detail-repair').textContent  = booking.repair_type || '—';
+      document.getElementById('detail-date').textContent    = formatDate(booking.preferred_date);
+      document.getElementById('detail-time').textContent    = booking.preferred_time || '—';
+
+      if (booking.notes) {
+        document.getElementById('detail-location').textContent       = booking.notes;
+        document.getElementById('detail-location-wrap').style.display = 'block';
+      }
+
+      if (quotation) {
+        document.getElementById('detail-price').textContent =
+          formatMoney(quotation.total_amount);
+        document.getElementById('detail-valid').textContent =
+          quotation.valid_until ? '📅 Valid until ' + formatDate(quotation.valid_until) : '';
+
+        if (quotation.notes) {
+          document.getElementById('detail-notes').textContent          = quotation.notes;
+          document.getElementById('detail-notes-wrap').style.display   = 'block';
+        }
+      } else {
+        document.getElementById('detail-price').textContent =
+          booking.quote_amount ? formatMoney(booking.quote_amount) : 'TBD';
+      }
+
+      showState('details');
+
+    } catch (e) {
+      showState('error');
+    }
+  }
+
+  // ── CONFIRM BOOKING ──
+  async function confirmBooking() {
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled    = true;
+    btn.textContent = 'Confirming...';
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const id     = params.get('id');
+
+      await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify({
+          status:           'accepted',
+          quote_accepted_at: new Date().toISOString()
+        })
+      });
+
+      if (quotation) {
+        await fetch(`${SUPABASE_URL}/rest/v1/quotations?id=eq.${quotation.id}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ status: 'accepted' })
+        });
+      }
+
+      showState('success');
+
+    } catch (e) {
+      btn.disabled    = false;
+      btn.textContent = '✅ Yes, Confirm My Repair';
+      alert('Something went wrong. Please try again or contact us on WhatsApp.');
+    }
+  }
+
+  // ── INIT ──
+  loadBooking();
+</script>
+
+</body>
+</html>

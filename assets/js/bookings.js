@@ -300,10 +300,9 @@ async function submitQuote() {
       const phone  = document.getElementById('q-phone').value;
       const email  = document.getElementById('q-email').value;
       const via    = document.querySelector('input[name="sendVia"]:checked').value;
-
-      const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: ${formatMoney(customerTotal)}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\nReply *YES* to confirm and we will arrange everything. 🇿🇲\n\n— LuminOus Tech`;
-
-      setTimeout(() => {
+      const baseURL = window.location.origin;
+      const confirmLink = `${baseURL}/public/confirm.html?id=${bookingId}`;
+      const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: ${formatMoney(customerTotal)}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\n👉 *Confirm your repair here:*\n${confirmLink}\n\nOr simply reply *YES* to confirm.\n\n— LuminOus Tech 🇿🇲`;      setTimeout(() => {
         if (via === 'whatsapp') {
           sendWhatsApp(phone, msg);
         } else {
