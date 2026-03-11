@@ -331,9 +331,39 @@ async function updateStatus(id, status) {
     const idx = allBookings.findIndex(b => b.id === id);
     if (idx > -1) allBookings[idx].status = status;
     showToast('✅ Status updated to ' + status);
+
+    // ── AUTO REVIEW REQUEST ──
+    if (status === 'completed') {
+      const b = allBookings.find(x => x.id === id);
+      if (b && b.phone) {
+        const firstName   = (b.name || 'there').split(' ')[0];
+        const baseURL     = window.location.origin;
+        const reviewLink  = `${baseURL}/public/review.html?id=${id}`;
+        const msg = `Hi ${firstName}! 🎉\n\nYour *${b.repair_type}* on your *${b.device}* is complete!\n\nWe hope everything is working perfectly. We'd love to hear your feedback:\n\n⭐ *Leave a quick review here:*\n${reviewLink}\n\nThank you for choosing LuminOus Tech! 🇿🇲`;
+
+        setTimeout(() => {
+          sendWhatsApp(b.phone, msg);
+        }, 500);
+      }
+    }
+
     applyFilter();
     loadDashboard();
   } catch (e) {
     showToast('Failed to update status', 'error');
   }
-}
+}  
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status })
+    });
+    const idx = allBookings.findIndex(b => b.id === id);
+    if (idx > -1) allBookings[idx].status = status;
+    showToast('✅ Status updated to ' + status);
+    applyFilter();
+    loadDashboard();
+  } catch (e) {
+    showToast('Failed to update status', 'error');
+  }

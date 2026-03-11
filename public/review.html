@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave a Review — LuminOus Tech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0a0a0f;
+      --surface: #111118;
+      --surface2:#1a1a24;
+      --border:  rgba(255,255,255,0.07);
+      --text:    #f0f0f5;
+      --muted:   #6b7280;
+      --accent:  #00c8ff;
+      --green:   #10b981;
+      --yellow:  #f59e0b;
+      --red:     #ef4444;
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .logo {
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+    }
+    .logo span { color: var(--accent); }
+    .logo-sub {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .divider { height:1px; background:var(--border); }
+
+    /* ── STATES ── */
+    .state { display:none; flex-direction:column; gap:1.25rem; }
+    .state.active { display:flex; }
+
+    .spinner {
+      width:36px; height:36px;
+      border:3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius:50%;
+      animation: spin 0.7s linear infinite;
+      margin: 1rem auto;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── STAR RATING ── */
+    .stars-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .stars-sub {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: -0.75rem;
+    }
+
+    .stars-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+    }
+
+    .star {
+      font-size: 2.8rem;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      filter: grayscale(1) opacity(0.3);
+      user-select: none;
+    }
+
+    .star.active {
+      filter: grayscale(0) opacity(1);
+      transform: scale(1.1);
+    }
+
+    .star:hover {
+      transform: scale(1.2);
+    }
+
+    .star-label {
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--yellow);
+      min-height: 1.4rem;
+      transition: all 0.2s;
+    }
+
+    /* ── FORM ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      resize: none;
+      outline: none;
+      min-height: 110px;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+    /* ── REPAIR SUMMARY ── */
+    .repair-summary {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .repair-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .repair-info-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .repair-info-value {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-top: 0.1rem;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 1rem;
+      border-radius: 14px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    .btn-submit {
+      background: var(--accent);
+      color: #000;
+      font-size: 1.05rem;
+    }
+
+    .btn-wa {
+      background: #25D366;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    /* ── SUCCESS ── */
+    .success-icon {
+      text-align: center;
+      font-size: 4rem;
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0%   { transform:scale(0); opacity:0; }
+      70%  { transform:scale(1.2); }
+      100% { transform:scale(1); opacity:1; }
+    }
+
+    .success-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-align: center;
+      color: var(--green);
+    }
+
+    .success-msg {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── ERROR ── */
+    .error-icon  { text-align:center; font-size:3rem; }
+    .error-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--red);
+    }
+    .error-msg { text-align:center; font-size:0.85rem; color:var(--muted); }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: -0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div>
+    <div class="logo">Lumin<span>Ous</span> Tech</div>
+    <div class="logo-sub">Lusaka's Trusted Phone Repair 🇿🇲</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LOADING -->
+  <div class="state active" id="state-loading">
+    <div class="spinner"></div>
+    <p style="text-align:center;font-size:0.85rem;color:var(--muted);">Loading...</p>
+  </div>
+
+  <!-- REVIEW FORM -->
+  <div class="state" id="state-form">
+    <div>
+      <div class="stars-title">How was your repair? ⭐</div>
+      <div class="stars-sub" id="form-subtitle">Tap a star to rate your experience</div>
+    </div>
+
+    <!-- REPAIR SUMMARY -->
+    <div class="repair-summary">
+      <div class="repair-icon">🔧</div>
+      <div>
+        <div class="repair-info-label">Completed Repair</div>
+        <div class="repair-info-value" id="repair-summary-text">—</div>
+      </div>
+    </div>
+
+    <!-- STARS -->
+    <div class="stars-wrap" id="starsWrap">
+      <span class="star" data-val="1" onclick="setRating(1)">⭐</span>
+      <span class="star" data-val="2" onclick="setRating(2)">⭐</span>
+      <span class="star" data-val="3" onclick="setRating(3)">⭐</span>
+      <span class="star" data-val="4" onclick="setRating(4)">⭐</span>
+      <span class="star" data-val="5" onclick="setRating(5)">⭐</span>
+    </div>
+    <div class="star-label" id="starLabel">—</div>
+
+    <!-- REVIEW TEXT -->
+    <div class="form-group">
+      <label>Your Review <span style="color:var(--muted);text-transform:none;font-size:0.7rem;font-weight:400;">(optional but appreciated)</span></label>
+      <textarea id="reviewText" maxlength="300"
+        placeholder="Tell us about your experience — was the technician professional? Was your device fixed properly?"
+        oninput="updateCharCount()"></textarea>
+      <div class="char-count"><span id="charCount">0</span>/300</div>
+    </div>
+
+    <button class="btn btn-submit" id="submitBtn" onclick="submitReview()" disabled>
+      Submit Review →
+    </button>
+
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">
+      Your review helps other customers in Lusaka find trusted repairs 🇿🇲
+    </p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="state" id="state-success">
+    <div class="success-icon">🙏</div>
+    <div class="success-title">Thank You!</div>
+    <div class="success-msg">
+      Your review means a lot to us. It helps other people in Lusaka find
+      trusted phone repairs. We really appreciate your support! 🇿🇲
+    </div>
+    <button class="btn btn-wa" onclick="shareWA()">
+      💬 Share LuminOus Tech with a friend
+    </button>
+  </div>
+
+  <!-- ALREADY REVIEWED -->
+  <div class="state" id="state-already">
+    <div style="text-align:center;font-size:3rem;">⭐</div>
+    <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:800;text-align:center;color:var(--yellow);">
+      Already Reviewed!
+    </div>
+    <div class="success-msg">
+      You've already left a review for this repair. Thank you so much! 🙏
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="state" id="state-error">
+    <div class="error-icon">😕</div>
+    <div class="error-title">Something went wrong</div>
+    <div class="error-msg">
+      This review link is invalid or has expired. Please contact us directly.
+    </div>
+    <button class="btn btn-wa" onclick="contactUs()">
+      💬 Contact LuminOus Tech
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://mmdtxhletzdmuwtiqppz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tZHR4aGxldHpkbXV3dGlxcHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNDg5MzgsImV4cCI6MjA4ODYyNDkzOH0.aMFeVOjU-osWmLjeDFD5QdAzqy7AJJPSn4-qnGUcZ8o';
+  const HEADERS = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+
+  const BUSINESS_PHONE = '260778817000';
+  let selectedRating = 0;
+  let booking = null;
+
+  const STAR_LABELS = {
+    1: 'Poor 😞',
+    2: 'Fair 😐',
+    3: 'Good 🙂',
+    4: 'Great 😊',
+    5: 'Excellent! 🤩'
+  };
+
+  // ── SHOW STATE ──
+  function showState(name) {
+    document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+  }
+
+  // ── STARS ──
+  function setRating(val) {
+    selectedRating = val;
+    document.querySelectorAll('.star').forEach(s => {
+      s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+    });
+    document.getElementById('starLabel').textContent = STAR_LABELS[val] || '';
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  // ── CHAR COUNT ──
+  function updateCharCount() {
+    const len = document.getElementById('reviewText').value.length;
+    document.getElementById('charCount').textContent = len;
+  }
+
+  // ── CONTACT ──
+  function contactUs() {
+    window.open('https://wa.me/' + BUSINESS_PHONE + '?text=' +
+      encodeURIComponent('Hi LuminOus Tech! 👋 I need help.'), '_blank');
+  }
+
+  // ── SHARE ──
+  function shareWA() {
+    const msg = `I just got my phone fixed by *LuminOus Tech* in Lusaka and it was 🔥\n\nFast, professional and came to my location!\n\nBook your repair here 👉 https://luminous-tech.pages.dev`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  // ── LOAD BOOKING ──
+  async function loadBooking() {
+    const params = new URLSearchParams(window.location.search);
+    const id     = params.get('id');
+    if (!id) { showState('error'); return; }
+
+    try {
+      const res  = await fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}&select=*`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const data = await res.json();
+      if (!data || !data.length) { showState('error'); return; }
+      booking = data[0];
+
+      // check if already reviewed
+      const rRes  = await fetch(
+        `${SUPABASE_URL}/rest/v1/reviews?booking_id=eq.${id}&select=id`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const rData = await rRes.json();
+      if (rData && rData.length) { showState('already'); return; }
+
+      // populate
+      const firstName = (booking.name || 'there').split(' ')[0];
+      document.getElementById('form-subtitle').textContent =
+        `Hi ${firstName}! How was your ${booking.repair_type || 'repair'}?`;
+      document.getElementById('repair-summary-text').textContent =
+        `${booking.repair_type || 'Repair'} — ${booking.device || 'Your device'}`;
+
+      showState('form');
+
+    } catch (e) {
+      showState('error');
+    }
+  }
+
+  // ── SUBMIT REVIEW ──
+  async function submitReview() {
+    if (!selectedRating) {
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled    = true;
+    btn.textContent = 'Submitting...';
+
+    const reviewText = document.getElementById('reviewText').value.trim();
+    const params     = new URLSearchParams(window.location.search);
+    const id         = params.get('id');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({
+          booking_id:  id,
+          name:        booking.name || 'Anonymous',
+          location:    booking.notes || 'Lusaka, Zambia',
+          rating:      selectedRating,
+          review_text: reviewText || null,
+          approved:    false
+        })
+      });
+
+      if (res.status === 201) {
+        showState('success');
+      } else {
+        throw new Error('Failed');
+      }
+    } catch (e) {
+      btn.disabled    = false;
+      btn.textContent = 'Submit Review →';
+      alert('Something went wrong. Please try again.');
+    }
+  }
+
+  // ── INIT ──
+  loadBooking();
+</script>
+
+</body>
+</html>
