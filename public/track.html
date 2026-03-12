@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Track Your Repair — LuminOus Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1421;
+    --card: #111827;
+    --border: rgba(0,200,255,0.1);
+    --accent: #00c8ff;
+    --accent2: #ff6b2b;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e8edf5;
+    --muted: #64748b;
+    --font: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── BACKGROUND GRID ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,20,0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+  }
+  .nav-logo { font-size: 1.1rem; font-weight: 800; text-decoration: none; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+  .nav-back {
+    display: flex; align-items: center; gap: 0.5rem;
+    color: var(--muted); font-size: 0.85rem; font-weight: 600;
+    text-decoration: none; transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1; position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 3rem 1.5rem 4rem;
+  }
+
+  /* ── HERO ── */
+  .page-hero { text-align: center; margin-bottom: 2.5rem; max-width: 520px; }
+  .page-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.2);
+    color: var(--accent); padding: 0.3rem 0.9rem; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .page-title { font-size: 2.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 0.8rem; }
+  .page-title span { color: var(--accent); }
+  .page-sub { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+  /* ── SEARCH BOX ── */
+  .search-card {
+    width: 100%; max-width: 520px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2rem;
+    box-shadow: 0 0 60px rgba(0,200,255,0.06);
+    margin-bottom: 2rem;
+  }
+  .search-label {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; display: block;
+  }
+  .search-row { display: flex; gap: 0.6rem; }
+  .search-input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.85rem 1rem; color: var(--text);
+    font-family: var(--font); font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.08); }
+  .search-input::placeholder { color: var(--muted); }
+  .search-btn {
+    background: var(--accent); color: #080c14;
+    border: none; padding: 0.85rem 1.4rem; border-radius: 10px;
+    font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .search-btn:hover { background: #33d4ff; }
+  .search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .search-hint {
+    font-size: 0.75rem; color: var(--muted); margin-top: 0.8rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+
+  /* ── RESULT CARD ── */
+  .result-card {
+    width: 100%; max-width: 520px;
+    animation: fadeUp 0.4s ease;
+    display: none;
+  }
+  .result-card.show { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── BOOKING HEADER ── */
+  .booking-header {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px 16px 0 0; padding: 1.5rem;
+    border-bottom: none;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .booking-customer { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.2rem; }
+  .booking-meta { font-size: 0.8rem; color: var(--muted); font-family: var(--mono); }
+  .booking-device-pill {
+    background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 8px; padding: 0.4rem 0.8rem;
+    font-size: 0.78rem; font-weight: 700; color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* ── STATUS TIMELINE ── */
+  .timeline-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-top: none; border-bottom: none;
+    padding: 1.8rem 1.5rem;
+  }
+  .timeline-title {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem;
+  }
+  .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+
+  .timeline-step {
+    display: flex; align-items: flex-start; gap: 1rem;
+    position: relative; padding-bottom: 1.4rem;
+  }
+  .timeline-step:last-child { padding-bottom: 0; }
+
+  /* vertical line */
+  .timeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute; left: 17px; top: 36px;
+    width: 2px; bottom: 0;
+    background: var(--border);
+    transition: background 0.4s;
+  }
+  .timeline-step.done:not(:last-child)::after { background: var(--green); }
+  .timeline-step.active:not(:last-child)::after { background: rgba(0,200,255,0.3); }
+
+  /* dot */
+  .step-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    transition: all 0.4s;
+    position: relative; z-index: 1;
+  }
+  .timeline-step.done .step-dot {
+    background: rgba(34,197,94,0.15);
+    border-color: var(--green);
+  }
+  .timeline-step.active .step-dot {
+    background: rgba(0,200,255,0.12);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(0,200,255,0.1);
+    animation: pulse-dot 2s infinite;
+  }
+  .timeline-step.cancelled .step-dot {
+    background: rgba(239,68,68,0.1);
+    border-color: var(--red);
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(0,200,255,0.1); }
+    50%       { box-shadow: 0 0 0 8px rgba(0,200,255,0.05); }
+  }
+
+  .step-content { flex: 1; padding-top: 0.35rem; }
+  .step-name {
+    font-size: 0.92rem; font-weight: 700; margin-bottom: 0.15rem;
+    color: var(--muted); transition: color 0.3s;
+  }
+  .timeline-step.done .step-name { color: var(--green); }
+  .timeline-step.active .step-name { color: var(--text); }
+  .timeline-step.cancelled .step-name { color: var(--red); }
+  .step-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+  .timeline-step.active .step-desc { color: var(--muted); }
+
+  .step-time {
+    font-size: 0.68rem; font-family: var(--mono);
+    color: var(--muted); margin-top: 0.3rem;
+  }
+  .timeline-step.active .step-time { color: var(--accent); }
+  .timeline-step.done .step-time { color: var(--green); opacity: 0.7; }
+
+  /* active step badge */
+  .active-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: rgba(0,200,255,0.1); border: 1px solid rgba(0,200,255,0.25);
+    color: var(--accent); border-radius: 100px;
+    font-size: 0.62rem; font-weight: 800; padding: 0.15rem 0.5rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-left: 0.5rem; vertical-align: middle;
+  }
+  .active-badge::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); animation: blink 1.2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── QUOTE SECTION ── */
+  .quote-section {
+    background: var(--card); border: 1px solid var(--border);
+    border-top: none; padding: 1.5rem;
+    display: none;
+  }
+  .quote-section.show { display: block; }
+  .quote-section-title {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 1rem;
+  }
+  .quote-amount-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0,200,255,0.05); border: 1px solid rgba(0,200,255,0.15);
+    border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 1rem;
+  }
+  .quote-amount-label { font-size: 0.85rem; color: var(--muted); }
+  .quote-amount-val { font-family: var(--mono); font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+  .quote-valid { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+  .quote-notes {
+    background: var(--surface); border-radius: 8px; padding: 0.8rem 1rem;
+    font-size: 0.82rem; color: var(--muted); line-height: 1.6;
+    border-left: 3px solid rgba(0,200,255,0.3); margin-bottom: 1rem;
+  }
+  .confirm-btn {
+    width: 100%; background: var(--green); color: #fff;
+    border: none; padding: 0.9rem; border-radius: 10px;
+    font-family: var(--font); font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .confirm-btn:hover { background: #16a34a; }
+  .confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .confirm-btn.confirmed { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); cursor: default; }
+
+  /* ── FOOTER CARD ── */
+  .result-footer {
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 16px 16px; padding: 1.2rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.8rem;
+  }
+  .result-footer-left { font-size: 0.78rem; color: var(--muted); }
+  .wa-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.25);
+    color: #25D366; padding: 0.5rem 1rem; border-radius: 8px;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 700;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .wa-btn:hover { background: rgba(37,211,102,0.2); }
+
+  /* ── ERROR / EMPTY STATES ── */
+  .state-box {
+    width: 100%; max-width: 520px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 3rem 2rem;
+    text-align: center; display: none;
+  }
+  .state-box.show { display: block; animation: fadeUp 0.3s ease; }
+  .state-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .state-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .state-sub { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── SPINNER ── */
+  .spinner-box {
+    width: 100%; max-width: 520px;
+    display: none; text-align: center; padding: 3rem;
+  }
+  .spinner-box.show { display: block; }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: inline-block; margin-bottom: 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-text { color: var(--muted); font-size: 0.875rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-size: 0.78rem; color: var(--muted);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 0.8rem 1.5rem; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 600; z-index: 9999;
+    opacity: 0; transition: all 0.3s; pointer-events: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4); white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    nav { padding: 0.85rem 1rem; }
+    .nav-logo { font-size: 1rem; }
+    main { padding: 2rem 1rem 3rem; }
+    .page-title { font-size: 1.7rem; }
+    .search-card { padding: 1.4rem; border-radius: 16px; }
+    .search-row { flex-direction: column; }
+    .search-btn { width: 100%; padding: 0.9rem; }
+    .booking-header { border-radius: 12px 12px 0 0; }
+    .result-footer { border-radius: 0 0 12px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://luminous-tech.pages.dev" class="nav-logo">Lumin<span>Ous</span> Tech</a>
+  <a href="https://luminous-tech.pages.dev" class="nav-back">
+    ← Back to Site
+  </a>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="page-badge">🔧 Real-time Tracking</div>
+    <h1 class="page-title">Track Your <span>Repair</span></h1>
+    <p class="page-sub">Enter your phone number or booking ID to see exactly where your device is in the repair process.</p>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-card">
+    <label class="search-label">Phone Number or Booking ID</label>
+    <div class="search-row">
+      <input
+        class="search-input"
+        type="text"
+        id="trackInput"
+        placeholder="+260 77 000 0000 or booking ID"
+        onkeydown="if(event.key==='Enter') doTrack()"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+      <button class="search-btn" id="trackBtn" onclick="doTrack()">Track →</button>
+    </div>
+    <div class="search-hint">
+      💡 Use the phone number you booked with, or the ID from your quote message
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="spinner-box" id="spinnerBox">
+    <div class="spinner"></div>
+    <div class="spinner-text">Looking up your booking...</div>
+  </div>
+
+  <!-- NOT FOUND -->
+  <div class="state-box" id="notFoundBox">
+    <div class="state-icon">🔍</div>
+    <div class="state-title">No Booking Found</div>
+    <div class="state-sub">
+      We couldn't find a booking with that phone number or ID.<br/><br/>
+      Double-check the number you booked with, or
+      <a href="https://wa.me/260778817000?text=Hi!%20I%20want%20to%20track%20my%20repair." target="_blank" style="color:var(--accent)">WhatsApp us</a> and we'll look it up for you.
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+
+    <!-- BOOKING HEADER -->
+    <div class="booking-header" id="bookingHeader"></div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-wrap">
+      <div class="timeline-title">Repair Progress</div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <!-- QUOTE SECTION (shown when quoted) -->
+    <div class="quote-section" id="quoteSection"></div>
+
+    <!-- FOOTER -->
+    <div class="result-footer" id="resultFooter"></div>
+
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <a href="https://luminous-tech.pages.dev">LuminOus Tech</a> · Lusaka, Zambia ·
+  <a href="https://wa.me/260778817000">+260 778 817 000</a>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL = 'https://mmdtxhletzdmuwtiqppz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tZHR4aGxldHpkbXV3dGlxcHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNDg5MzgsImV4cCI6MjA4ODYyNDkzOH0.aMFeVOjU-osWmLjeDFD5QdAzqy7AJJPSn4-qnGUcZ8o';
+
+  // ── STATUS CONFIG ──
+  const STEPS = [
+    {
+      key: 'pending',
+      icon: '📋',
+      name: 'Booking Received',
+      desc: 'We\'ve received your repair request and will be in touch shortly to confirm.'
+    },
+    {
+      key: 'quoted',
+      icon: '💰',
+      name: 'Quote Sent',
+      desc: 'We\'ve assessed your device and sent you a price quote. Check your WhatsApp or email.'
+    },
+    {
+      key: 'accepted',
+      icon: '✅',
+      name: 'Quote Accepted',
+      desc: 'You\'ve confirmed the quote. Our technician is being scheduled for your repair.'
+    },
+    {
+      key: 'completed',
+      icon: '🎉',
+      name: 'Repair Completed',
+      desc: 'Your device has been fixed! We hope to see you again.'
+    }
+  ];
+
+  const STATUS_ORDER = ['pending', 'quoted', 'accepted', 'completed'];
+
+  // ── HELPERS ──
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function formatDate(iso) {
+    if (!iso) return null;
+    return new Date(iso).toLocaleDateString('en-ZM', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  function cleanPhone(phone) {
+    let p = (phone || '').replace(/[\s\-().+]/g, '');
+    if (p.startsWith('0')) p = '260' + p.slice(1);
+    if (p.length <= 9 && /^[79]/.test(p)) p = '260' + p;
+    return p;
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+  function show(id) { document.getElementById(id).classList.add('show'); }
+  function hide(id) { document.getElementById(id).classList.remove('show'); }
+  function hideAll() {
+    hide('spinnerBox'); hide('notFoundBox'); hide('resultCard');
+  }
+
+  // ── AUTO-LOAD FROM URL PARAM ──
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id') || params.get('ref');
+    const phone = params.get('phone');
+    if (id) {
+      document.getElementById('trackInput').value = id;
+      doTrack();
+    } else if (phone) {
+      document.getElementById('trackInput').value = phone;
+      doTrack();
+    }
+  });
+
+  // ── MAIN TRACK FUNCTION ──
+  async function doTrack() {
+    const raw = document.getElementById('trackInput').value.trim();
+    if (!raw) { showToast('⚠️ Please enter your phone number or booking ID.'); return; }
+
+    const btn = document.getElementById('trackBtn');
+    btn.disabled = true; btn.textContent = '...';
+    hideAll();
+    show('spinnerBox');
+
+    try {
+      let booking = null;
+      let quote = null;
+
+      // Try as booking ID (UUID format)
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw);
+
+      if (isUUID) {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(raw)}&limit=1`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        );
+        const data = await res.json();
+        booking = data && data[0] ? data[0] : null;
+      }
+
+      // Try as phone number
+      if (!booking) {
+        const cleaned = cleanPhone(raw);
+        // Try cleaned version and original
+        const phones = [cleaned, raw, raw.replace(/[\s\-().]/g,'')].filter((v,i,a) => a.indexOf(v) === i);
+
+        for (const p of phones) {
+          const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/bookings?phone=eq.${encodeURIComponent(p)}&order=created_at.desc&limit=1`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+          );
+          const data = await res.json();
+          if (data && data[0]) { booking = data[0]; break; }
+        }
+      }
+
+      if (!booking) {
+        hideAll();
+        show('notFoundBox');
+        return;
+      }
+
+      // If booking is quoted or beyond, fetch the quote details
+      if (['quoted','accepted','completed','paid'].includes(booking.status)) {
+        const qRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/quotations?booking_id=eq.${booking.id}&order=created_at.desc&limit=1`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        );
+        const qData = await qRes.json();
+        quote = qData && qData[0] ? qData[0] : null;
+      }
+
+      hideAll();
+      renderResult(booking, quote);
+      show('resultCard');
+
+    } catch(e) {
+      hideAll();
+      showToast('❌ Something went wrong. Please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Track →';
+    }
+  }
+
+  // ── RENDER RESULT ──
+  function renderResult(b, quote) {
+    const currentStatus = b.status || 'pending';
+    const isCancelled = currentStatus === 'cancelled';
+    const currentIdx = STATUS_ORDER.indexOf(currentStatus);
+
+    // ── HEADER ──
+    document.getElementById('bookingHeader').innerHTML = `
+      <div>
+        <div class="booking-customer">${esc(b.name || 'Customer')}</div>
+        <div class="booking-meta">
+          ${b.phone ? esc(b.phone) + ' · ' : ''}
+          Booked ${formatDate(b.created_at) || '—'}
+        </div>
+      </div>
+      <div class="booking-device-pill">📱 ${esc(b.device || b.repair_type || 'Device')}</div>
+    `;
+
+    // ── TIMELINE ──
+    const timeline = document.getElementById('timeline');
+
+    if (isCancelled) {
+      timeline.innerHTML = `
+        <div class="timeline-step cancelled">
+          <div class="step-dot">❌</div>
+          <div class="step-content">
+            <div class="step-name">Booking Cancelled</div>
+            <div class="step-desc">This booking has been cancelled. WhatsApp us to rebook.</div>
+          </div>
+        </div>
+      `;
+    } else {
+      timeline.innerHTML = STEPS.map((step, i) => {
+        let stepClass = '';
+        let timeText = '';
+        let badge = '';
+
+        if (i < currentIdx) {
+          stepClass = 'done';
+          // Show timestamp for relevant steps
+          if (step.key === 'pending') timeText = formatDate(b.created_at);
+          if (step.key === 'quoted' && b.quote_sent_at) timeText = formatDate(b.quote_sent_at);
+          if (step.key === 'accepted' && b.accepted_at) timeText = formatDate(b.accepted_at);
+          if (step.key === 'completed' && b.completed_at) timeText = formatDate(b.completed_at);
+        } else if (i === currentIdx) {
+          stepClass = 'active';
+          badge = '<span class="active-badge">Now</span>';
+          if (step.key === 'pending') timeText = formatDate(b.created_at);
+          if (step.key === 'quoted' && b.quote_sent_at) timeText = formatDate(b.quote_sent_at);
+          if (step.key === 'completed' && b.completed_at) timeText = formatDate(b.completed_at);
+        }
+
+        return `
+          <div class="timeline-step ${stepClass}">
+            <div class="step-dot">${stepClass === 'done' ? '✓' : step.icon}</div>
+            <div class="step-content">
+              <div class="step-name">${step.name}${badge}</div>
+              <div class="step-desc">${step.desc}</div>
+              ${timeText ? `<div class="step-time">${timeText}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── QUOTE SECTION ──
+    const quoteSection = document.getElementById('quoteSection');
+    if (quote && ['quoted','accepted'].includes(currentStatus)) {
+      quoteSection.classList.add('show');
+      const isAccepted = currentStatus === 'accepted';
+      quoteSection.innerHTML = `
+        <div class="quote-section-title">Your Quote</div>
+        <div class="quote-amount-row">
+          <div>
+            <div class="quote-amount-label">Total Repair Cost</div>
+            ${quote.valid_until ? `<div class="quote-valid">Valid until ${new Date(quote.valid_until).toLocaleDateString('en-ZM', {day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
+          </div>
+          <div class="quote-amount-val">K ${(quote.total_amount || 0).toLocaleString()}</div>
+        </div>
+        ${quote.notes ? `<div class="quote-notes">📝 ${esc(quote.notes)}</div>` : ''}
+        ${!isAccepted ? `
+          <button class="confirm-btn" id="confirmBtn" onclick="confirmQuote('${b.id}')">
+            ✅ Confirm & Accept Quote
+          </button>
+        ` : `
+          <button class="confirm-btn confirmed" disabled>
+            ✅ Quote Accepted — We'll be in touch!
+          </button>
+        `}
+      `;
+    } else {
+      quoteSection.classList.remove('show');
+    }
+
+    // ── FOOTER ──
+    const statusMessages = {
+      pending: 'We\'ll confirm your booking shortly.',
+      quoted: 'Reply YES on WhatsApp or click Confirm above.',
+      accepted: 'Sit tight — our technician is on the way.',
+      completed: 'Thank you for choosing LuminOus Tech! 🇿🇲',
+      cancelled: 'Contact us to rebook.'
+    };
+    document.getElementById('resultFooter').innerHTML = `
+      <div class="result-footer-left">
+        ${statusMessages[currentStatus] || 'We\'ll be in touch soon.'}
+      </div>
+      <a class="wa-btn" href="https://wa.me/260778817000?text=Hi%20LuminOus%20Tech!%20I%20want%20to%20check%20on%20my%20repair%20for%20${encodeURIComponent(b.name || '')}." target="_blank">
+        💬 WhatsApp Us
+      </a>
+    `;
+  }
+
+  // ── CONFIRM QUOTE ──
+  async function confirmQuote(bookingId) {
+    const btn = document.getElementById('confirmBtn');
+    if (!btn) return;
+    btn.disabled = true; btn.textContent = 'Confirming...';
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ status: 'accepted', accepted_at: new Date().toISOString() })
+      });
+
+      if (res.ok) {
+        btn.classList.add('confirmed');
+        btn.textContent = '✅ Quote Accepted — We\'ll be in touch!';
+        showToast('🎉 Quote confirmed! We\'ll contact you shortly.');
+        // Update the timeline to reflect accepted status
+        setTimeout(() => doTrack(), 800);
+      } else {
+        throw new Error('Failed');
+      }
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = '✅ Confirm & Accept Quote';
+      showToast('❌ Could not confirm. Please WhatsApp us.');
+    }
+  }
+</script>
+</body>
+</html>
