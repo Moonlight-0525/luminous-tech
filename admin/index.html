@@ -337,17 +337,62 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
+    /* Topbar */
     .topbar { padding: 0.8rem 1rem; }
-    .tabs { padding: 0.8rem 1rem 0; gap: 0; overflow-x: auto; }
-    .tab-btn { font-size: 0.8rem; padding: 0.6rem 0.9rem; white-space: nowrap; }
-    .main { padding: 1rem; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .bookings-table th:nth-child(4),
-    .bookings-table td:nth-child(4),
+    .topbar-time { display: none; }
+
+    /* Tabs — scrollable, no wrap */
+    .tabs { padding: 0.6rem 0.8rem 0; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { font-size: 0.75rem; padding: 0.55rem 0.8rem; white-space: nowrap; }
+
+    /* Main */
+    .main { padding: 0.9rem; }
+
+    /* Stats — 2 col */
+    .stats-row { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .stat-value { font-size: 1.5rem; }
+    .stat-card { padding: 1rem; }
+
+    /* Section header stack */
+    .section-header { flex-direction: column; align-items: flex-start; }
+    .section-controls { width: 100%; }
+    .search-input { width: 100%; }
+
+    /* Table — hide less important columns, allow horizontal scroll */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .bookings-table { min-width: 500px; }
+
+    /* Hide: Preferred date col (3) and Submitted col (5) */
+    .bookings-table th:nth-child(3),
+    .bookings-table td:nth-child(3),
     .bookings-table th:nth-child(5),
     .bookings-table td:nth-child(5) { display: none; }
+
+    /* Action buttons wrap tightly */
+    .action-btns { flex-wrap: wrap; gap: 0.3rem; }
+    .btn-sm { font-size: 0.7rem; padding: 0.3rem 0.6rem; }
+
+    /* Modals full-width */
+    .modal { max-width: 100%; border-radius: 16px 16px 0 0; position: fixed; bottom: 0; max-height: 92vh; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+
+    /* Forms */
     .detail-grid { grid-template-columns: 1fr; }
     .form-row-2 { grid-template-columns: 1fr; }
+
+    /* Analytics */
+    .analytics-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+    .analytics-big { font-size: 1.8rem; }
+    .analytics-full { grid-column: 1; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .stat-value { font-size: 1.3rem; }
+    .stat-label { font-size: 0.65rem; }
+    .topbar-logo { font-size: 0.95rem; }
+    .tab-btn { font-size: 0.7rem; padding: 0.5rem 0.65rem; }
   }
 </style>
 </head>
@@ -892,16 +937,9 @@
         const email = document.getElementById('q-email').value;
         const via = document.querySelector('input[name="sendVia"]:checked').value;
 
-        // Build a confirm link that pre-fills the booking reference
-        const confirmParams = new URLSearchParams({
-          ref: bookingId,
-          name: name,
-          device: device,
-          amount: customerTotal
-        });
-        const confirmLink = `https://luminoustech.co.zm/confirm?${confirmParams.toString()}`;
+        const confirmLink = `https://luminous-tech.pages.dev/public/confirm.html?id=${bookingId}`;
 
-        const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: K ${customerTotal.toLocaleString()}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\n🔗 *Confirm your booking here:*\n${confirmLink}\n\nOr simply reply *YES* to confirm and we will arrange a visit. 🇿🇲\n\n— LuminOus Tech`;
+        const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: K ${customerTotal.toLocaleString()}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\n👉 *Confirm your repair here:*\n${confirmLink}\n\nOr simply reply *YES* to confirm.\n\n— LuminOus Tech 🇿🇲`;
 
         setTimeout(() => {
           if (via === 'whatsapp') {
