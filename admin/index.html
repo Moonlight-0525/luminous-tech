@@ -1,461 +1,1154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LuminOus Tech — Admin</title>
-  <link rel="stylesheet" href="../assets/css/main.css"/>
-  <link rel="stylesheet" href="../assets/css/admin.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LuminOus Tech — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1421;
+    --card: #111827;
+    --border: rgba(0,200,255,0.1);
+    --accent: #00c8ff;
+    --accent2: #ff6b2b;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e8edf5;
+    --muted: #64748b;
+    --font: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; flex-direction: column; gap: 2rem;
+  }
+  .login-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3rem; width: 100%; max-width: 400px;
+    box-shadow: 0 0 60px rgba(0,200,255,0.08);
+  }
+  .login-logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .login-logo span { color: var(--accent); }
+  .login-sub { color: var(--muted); font-size: 0.875rem; margin-bottom: 2rem; }
+  .login-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; display: block; }
+  .login-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.85rem 1rem; color: var(--text);
+    font-family: var(--font); font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s; margin-bottom: 1rem;
+  }
+  .login-input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%; background: var(--accent); color: #080c14;
+    border: none; padding: 0.9rem; border-radius: 10px;
+    font-family: var(--font); font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+  }
+  .login-btn:hover { background: #33d4ff; }
+  .login-error { color: var(--red); font-size: 0.8rem; margin-top: 0.5rem; display: none; }
+
+  /* ── LAYOUT ── */
+  #adminApp { display: none; min-height: 100vh; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,20,0.95); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem; gap: 1rem;
+  }
+  .topbar-logo { font-size: 1.1rem; font-weight: 800; }
+  .topbar-logo span { color: var(--accent); }
+  .topbar-badge {
+    background: rgba(0,200,255,0.1); border: 1px solid var(--border);
+    color: var(--accent); padding: 0.2rem 0.7rem; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 1rem; }
+  .topbar-time { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+  .logout-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 0.4rem 0.9rem; border-radius: 8px;
+    font-family: var(--font); font-size: 0.8rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex; gap: 0.25rem; padding: 1rem 2rem 0;
+    border-bottom: 1px solid var(--border); background: var(--surface);
+  }
+  .tab-btn {
+    background: transparent; border: none; color: var(--muted);
+    font-family: var(--font); font-size: 0.875rem; font-weight: 600;
+    padding: 0.7rem 1.2rem; cursor: pointer; border-radius: 8px 8px 0 0;
+    transition: all 0.2s; position: relative; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .tab-btn.active { color: var(--accent); background: var(--card); border: 1px solid var(--border); border-bottom: 1px solid var(--card); margin-bottom: -1px; }
+  .tab-count {
+    background: var(--accent2); color: white;
+    font-size: 0.65rem; font-weight: 800; padding: 0.1rem 0.45rem;
+    border-radius: 100px; min-width: 18px; text-align: center;
+  }
+  .tab-count.green { background: var(--green); }
+
+  /* ── MAIN CONTENT ── */
+  .main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.4rem; position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .stat-card.blue::before { background: var(--accent); }
+  .stat-card.orange::before { background: var(--accent2); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; }
+  .stat-value { font-size: 2rem; font-weight: 800; font-family: var(--mono); }
+  .stat-value.blue { color: var(--accent); }
+  .stat-value.orange { color: var(--accent2); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+
+  /* ── SECTION ── */
+  .section { display: none; }
+  .section.active { display: block; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .section-title { font-size: 1.1rem; font-weight: 700; }
+  .section-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+  /* ── FILTER / SEARCH ── */
+  .filter-select, .search-input {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: 0.85rem;
+    padding: 0.5rem 0.9rem; border-radius: 8px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-select:focus, .search-input:focus { border-color: var(--accent); }
+  .search-input { width: 220px; }
+  .refresh-btn {
+    background: rgba(0,200,255,0.08); border: 1px solid var(--border);
+    color: var(--accent); padding: 0.5rem 1rem; border-radius: 8px;
+    font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(0,200,255,0.15); }
+
+  /* ── BOOKINGS TABLE ── */
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .bookings-table { width: 100%; border-collapse: collapse; }
+  .bookings-table th {
+    background: var(--surface); padding: 0.9rem 1rem;
+    text-align: left; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .bookings-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.875rem; vertical-align: middle; }
+  .bookings-table tr:last-child td { border-bottom: none; }
+  .bookings-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .booking-name { font-weight: 600; }
+  .booking-phone { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
+  .booking-device { font-size: 0.8rem; color: var(--muted); }
+  .booking-date { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+
+  /* ── STATUS BADGES ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.25rem 0.7rem; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .badge.pending { background: rgba(245,158,11,0.12); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+  .badge.pending::before { background: var(--yellow); }
+  .badge.quoted { background: rgba(0,200,255,0.1); color: var(--accent); border: 1px solid rgba(0,200,255,0.2); }
+  .badge.quoted::before { background: var(--accent); }
+  .badge.accepted { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .badge.accepted::before { background: var(--green); }
+  .badge.completed { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .badge.completed::before { background: #4ade80; }
+  .badge.cancelled { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .badge.cancelled::before { background: var(--red); }
+  .badge.paid { background: rgba(139,92,246,0.1); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+  .badge.paid::before { background: #a78bfa; }
+
+  /* ── ACTION BUTTONS ── */
+  .action-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .btn-sm {
+    padding: 0.35rem 0.8rem; border-radius: 6px; font-family: var(--font);
+    font-size: 0.75rem; font-weight: 700; cursor: pointer; border: none;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-quote { background: rgba(0,200,255,0.12); color: var(--accent); border: 1px solid rgba(0,200,255,0.2); }
+  .btn-quote:hover { background: rgba(0,200,255,0.22); }
+  .btn-complete { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .btn-complete:hover { background: rgba(34,197,94,0.22); }
+  .btn-cancel { background: rgba(239,68,68,0.08); color: var(--red); border: 1px solid rgba(239,68,68,0.15); }
+  .btn-cancel:hover { background: rgba(239,68,68,0.18); }
+  .btn-view { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); }
+  .btn-view:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-wa { background: rgba(37,211,102,0.1); color: #25D366; border: 1px solid rgba(37,211,102,0.2); }
+  .btn-wa:hover { background: rgba(37,211,102,0.2); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-text { font-size: 0.95rem; }
+
+  /* ── LOADING ── */
+  .loading-row td { text-align: center; padding: 3rem; color: var(--muted); }
+  .spinner {
+    width: 24px; height: 24px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: inline-block; margin-bottom: 0.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px); z-index: 1000;
+    display: none; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; width: 100%; max-width: 580px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 0 80px rgba(0,0,0,0.5);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-size: 1.1rem; font-weight: 800; }
+  .modal-close {
+    background: transparent; border: none; color: var(--muted);
+    font-size: 1.4rem; cursor: pointer; line-height: 1;
+    transition: color 0.2s; padding: 0.2rem;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.8rem; justify-content: flex-end; }
+
+  /* ── DETAIL GRID ── */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .detail-item { background: var(--surface); border-radius: 10px; padding: 0.9rem 1rem; }
+  .detail-item-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+  .detail-item-value { font-size: 0.9rem; font-weight: 600; }
+  .detail-item.full { grid-column: 1 / -1; }
+
+  /* ── QUOTE FORM ── */
+  .quote-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .form-group input, .form-group textarea, .form-group select {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.7rem 0.9rem; color: var(--text);
+    font-family: var(--font); font-size: 0.9rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .total-display {
+    background: rgba(0,200,255,0.06); border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 10px; padding: 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .total-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+  .total-amount { font-family: var(--mono); font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+
+  /* ── SUBMIT BUTTONS ── */
+  .btn-primary {
+    background: var(--accent); color: #080c14;
+    border: none; padding: 0.8rem 1.5rem; border-radius: 10px;
+    font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #33d4ff; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 0.8rem 1.5rem; border-radius: 10px;
+    font-family: var(--font); font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text); color: var(--text); }
+
+  /* ── WAITLIST TABLE ── */
+  .waitlist-table { width: 100%; border-collapse: collapse; }
+  .waitlist-table th { background: var(--surface); padding: 0.9rem 1rem; text-align: left; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .waitlist-table td { padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.875rem; }
+  .waitlist-table tr:last-child td { border-bottom: none; }
+  .email-val { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 0.8rem 1.5rem; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 600; z-index: 9999;
+    opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── ANALYTICS ── */
+  .analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .analytics-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.4rem;
+  }
+  .analytics-card-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+  .analytics-big { font-size: 2.2rem; font-weight: 800; font-family: var(--mono); color: var(--accent); margin-bottom: 0.3rem; }
+  .analytics-sub { font-size: 0.75rem; color: var(--muted); }
+  .analytics-breakdown { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .breakdown-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; }
+  .breakdown-label { color: var(--muted); }
+  .breakdown-val { font-family: var(--mono); font-weight: 700; }
+  .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+  .bar-label { font-size: 0.75rem; color: var(--muted); width: 70px; text-align: right; }
+  .bar-track { flex: 1; background: rgba(255,255,255,0.05); border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-val { font-size: 0.72rem; font-family: var(--mono); color: var(--muted); width: 40px; }
+  .analytics-full { grid-column: 1 / -1; }
+  @media (max-width: 768px) { .analytics-grid { grid-template-columns: 1fr; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .topbar { padding: 0.8rem 1rem; }
+    .tabs { padding: 0.8rem 1rem 0; gap: 0; overflow-x: auto; }
+    .tab-btn { font-size: 0.8rem; padding: 0.6rem 0.9rem; white-space: nowrap; }
+    .main { padding: 1rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .bookings-table th:nth-child(4),
+    .bookings-table td:nth-child(4),
+    .bookings-table th:nth-child(5),
+    .bookings-table td:nth-child(5) { display: none; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .form-row-2 { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     LOGIN SCREEN
-══════════════════════════════════════════ -->
-<div id="loginScreen" class="login-screen">
-  <div class="login-card">
-    <div class="login-logo">
-      <h1>Lumin<span>Ous</span> Tech</h1>
-      <p class="text-muted">Admin Dashboard · Lusaka 🇿🇲</p>
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="passwordInput" placeholder="Enter admin password"
-        onkeydown="if(event.key==='Enter') doLogin()"/>
-    </div>
-    <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">
-      Login →
-    </button>
-    <div id="loginError" style="display:none;text-align:center;color:var(--red);font-size:0.85rem;font-weight:600;"></div>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Lumin<span>Ous</span> Tech</div>
+    <div class="login-sub">Admin Dashboard — Restricted Access</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="loginPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
+    <div class="login-error" id="loginError">❌ Incorrect password. Try again.</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     ADMIN APP
-══════════════════════════════════════════ -->
-<div id="adminApp" style="display:none;">
+<!-- ADMIN APP -->
+<div id="adminApp">
 
-  <!-- DESKTOP SIDEBAR -->
-  <aside class="admin-sidebar" id="sidebar" style="display:none;">
-    <div style="padding:0.5rem 0.75rem 1.5rem;">
-      <div class="admin-logo">Lumin<span>Ous</span> Tech</div>
-      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;">Admin Panel</div>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:0.8rem;">
+      <div class="topbar-logo">Lumin<span>Ous</span> Tech</div>
+      <div class="topbar-badge">ADMIN</div>
     </div>
-    <a href="#" class="nav-item active" id="sb-dashboard" onclick="showPage('dashboard',this)">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label" style="font-size:0.85rem;">Dashboard</span>
-    </a>
-    <a href="#" class="nav-item" id="sb-bookings" onclick="showPage('bookings',this)">
-      <span class="nav-icon">📋</span>
-      <span class="nav-label" style="font-size:0.85rem;">Bookings</span>
-    </a>
-    <a href="#" class="nav-item" id="sb-inventory" onclick="showPage('inventory',this)">
-      <span class="nav-icon">📦</span>
-      <span class="nav-label" style="font-size:0.85rem;">Inventory</span>
-    </a>
-    <a href="#" class="nav-item" id="sb-customers" onclick="showPage('customers',this)">
-      <span class="nav-icon">👥</span>
-      <span class="nav-label" style="font-size:0.85rem;">Customers</span>
-    </a>
-    <a href="#" class="nav-item" id="sb-analytics" onclick="showPage('analytics',this)">
-      <span class="nav-icon">📈</span>
-      <span class="nav-label" style="font-size:0.85rem;">Analytics</span>
-    </a>
-    <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);">
-      <button class="btn btn-secondary btn-full btn-sm" onclick="doLogout()">Logout</button>
+    <div class="topbar-right">
+      <div class="topbar-time" id="clock"></div>
+      <button class="logout-btn" onclick="doLogout()">Log Out</button>
     </div>
-  </aside>
+  </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="admin-main" id="adminMain">
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('bookings', this)">
+      📋 Bookings <span class="tab-count" id="pendingCount">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('quotations', this)">
+      💰 Quotations <span class="tab-count green" id="quotedCount">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('analytics', this)">
+      📊 Analytics
+    </button>
+    <button class="tab-btn" onclick="switchTab('waitlist', this)">
+      🔔 Waitlist
+    </button>
+  </div>
 
-    <!-- TOP BAR -->
-    <div class="admin-topbar">
-      <div class="admin-topbar-left">
-        <div>
-          <div class="admin-logo" style="font-size:1rem;">Lumin<span>Ous</span> Tech</div>
-          <div class="admin-page-title" id="pageTitle">Dashboard</div>
-        </div>
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card blue">
+        <div class="stat-label">Total Bookings</div>
+        <div class="stat-value blue" id="statTotal">—</div>
+        <div class="stat-sub">All time</div>
       </div>
-      <div class="admin-topbar-right">
-        <div id="liveClock" style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);"></div>
-        <button class="btn btn-secondary btn-sm" onclick="doLogout()">Out</button>
+      <div class="stat-card orange">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value orange" id="statPending">—</div>
+        <div class="stat-sub">Needs attention</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value green" id="statCompleted">—</div>
+        <div class="stat-sub">Successfully done</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value yellow" id="statRevenue">—</div>
+        <div class="stat-sub">From completed jobs</div>
       </div>
     </div>
 
-    <!-- ── DASHBOARD PAGE ── -->
-    <div id="page-dashboard" class="admin-page">
-
-      <!-- STATS -->
-      <div class="stats-grid">
-        <div class="stat-card yellow">
-          <div class="stat-icon">⏳</div>
-          <div class="stat-value" id="stat-pending">0</div>
-          <div class="stat-label">Pending</div>
-        </div>
-        <div class="stat-card accent">
-          <div class="stat-icon">🔧</div>
-          <div class="stat-value" id="stat-total">0</div>
-          <div class="stat-label">Total Bookings</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-icon">✅</div>
-          <div class="stat-value" id="stat-completed">0</div>
-          <div class="stat-label">Completed</div>
-        </div>
-        <div class="stat-card purple">
-          <div class="stat-icon">💰</div>
-          <div class="stat-value" id="stat-revenue">K0</div>
-          <div class="stat-label">Revenue</div>
-        </div>
-      </div>
-
-      <div class="divider" style="margin:0.5rem 1.25rem;"></div>
-
-      <!-- RECENT BOOKINGS -->
+    <!-- BOOKINGS SECTION -->
+    <div class="section active" id="section-bookings">
       <div class="section-header">
-        <div class="section-title">Recent Bookings</div>
-        <button class="btn btn-secondary btn-sm" onclick="showPage('bookings')">See All</button>
-      </div>
-      <div class="bookings-list" id="recentBookingsList">
-        <div class="flex-center" style="padding:2rem;">
-          <div class="spinner"></div>
+        <div class="section-title">All Bookings</div>
+        <div class="section-controls">
+          <input class="search-input" type="text" placeholder="Search name or phone..." oninput="filterBookings()" id="bookingSearch"/>
+          <select class="filter-select" onchange="filterBookings()" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="quoted">Quoted</option>
+            <option value="accepted">Accepted</option>
+            <option value="paid">Paid</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="refresh-btn" onclick="loadBookings()">↻ Refresh</button>
         </div>
       </div>
-    </div>
-
-    <!-- ── BOOKINGS PAGE ── -->
-    <div id="page-bookings" class="admin-page" style="display:none;">
-      <div class="search-bar">
-        <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Search name, phone, device..."
-            oninput="filterBookings(this.value)" id="bookingSearch"/>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="loadBookings()">↻</button>
-      </div>
-      <div class="filter-tabs" id="filterTabs">
-        <button class="filter-tab active" onclick="setFilter('all',this)">All <span class="count" id="fc-all">0</span></button>
-        <button class="filter-tab" onclick="setFilter('pending',this)">Pending <span class="count" id="fc-pending">0</span></button>
-        <button class="filter-tab" onclick="setFilter('quoted',this)">Quoted <span class="count" id="fc-quoted">0</span></button>
-        <button class="filter-tab" onclick="setFilter('accepted',this)">Accepted <span class="count" id="fc-accepted">0</span></button>
-        <button class="filter-tab" onclick="setFilter('paid',this)">Paid <span class="count" id="fc-paid">0</span></button>
-        <button class="filter-tab" onclick="setFilter('completed',this)">Completed <span class="count" id="fc-completed">0</span></button>
-        <button class="filter-tab" onclick="setFilter('cancelled',this)">Cancelled <span class="count" id="fc-cancelled">0</span></button>
-      </div>
-      <div class="bookings-list" id="bookingsList">
-        <div class="flex-center" style="padding:2rem;">
-          <div class="spinner"></div>
-        </div>
+      <div class="table-wrap">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Device / Repair</th>
+              <th>Preferred</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsBody">
+            <tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Loading bookings...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- ── INVENTORY PAGE ── -->
-    <div id="page-inventory" class="admin-page" style="display:none;">
-      <div style="position:sticky;top:65px;z-index:50;background:var(--bg);padding:0.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-  <div class="section-title">Parts Inventory</div>
-  <button class="btn btn-primary btn-sm" onclick="openAddPartModal()">+ Add Part</button>
-</div>
-<div class="inventory-grid" id="inventoryGrid" style="margin-top:0.75rem;">
-        <div class="flex-center" style="padding:2rem;grid-column:1/-1;">
-          <div class="spinner"></div>
+    <!-- QUOTATIONS SECTION -->
+    <div class="section" id="section-quotations">
+      <div class="section-header">
+        <div class="section-title">Quotations Sent</div>
+        <div class="section-controls">
+          <button class="refresh-btn" onclick="loadQuotations()">↻ Refresh</button>
         </div>
+      </div>
+      <div class="table-wrap">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Device / Issue</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Sent</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="quotationsBody">
+            <tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Loading quotations...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- ── CUSTOMERS PAGE ── -->
-    <div id="page-customers" class="admin-page" style="display:none;">
-      <div class="search-bar">
-        <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Search customers..."
-            oninput="filterCustomers(this.value)"/>
+    <!-- ANALYTICS SECTION -->
+    <div class="section" id="section-analytics">
+      <div class="section-header">
+        <div class="section-title">Revenue & Analytics</div>
+        <div class="section-controls">
+          <button class="refresh-btn" onclick="loadAnalytics()">↻ Refresh</button>
         </div>
       </div>
-      <div class="bookings-list" id="customersList">
-        <div class="flex-center" style="padding:2rem;">
-          <div class="spinner"></div>
-        </div>
+      <div class="analytics-grid" id="analyticsGrid">
+        <div style="text-align:center;padding:4rem;color:var(--muted)"><div class="spinner"></div><br/>Loading analytics...</div>
       </div>
     </div>
 
-    <!-- ── ANALYTICS PAGE ── -->
-    <div id="page-analytics" class="admin-page" style="display:none;">
-      <div style="padding:1.25rem;">
-        <div class="stats-grid" style="padding:0;margin-bottom:1.5rem;">
-          <div class="stat-card green">
-            <div class="stat-icon">💵</div>
-            <div class="stat-value" id="an-revenue">K0</div>
-            <div class="stat-label">Total Revenue</div>
-          </div>
-          <div class="stat-card accent">
-            <div class="stat-icon">🔧</div>
-            <div class="stat-value" id="an-jobs">0</div>
-            <div class="stat-label">Jobs Done</div>
-          </div>
-          <div class="stat-card yellow">
-            <div class="stat-icon">⭐</div>
-            <div class="stat-value" id="an-rating">—</div>
-            <div class="stat-label">Avg Rating</div>
-          </div>
-          <div class="stat-card purple">
-            <div class="stat-icon">👥</div>
-            <div class="stat-value" id="an-customers">0</div>
-            <div class="stat-label">Customers</div>
-          </div>
+    <!-- WAITLIST SECTION -->
+    <div class="section" id="section-waitlist">
+      <div class="section-header">
+        <div class="section-title">Sell Feature Waitlist</div>
+        <div class="section-controls">
+          <button class="refresh-btn" onclick="loadWaitlist()">↻ Refresh</button>
         </div>
-
-        <!-- TOP REPAIRS -->
-        <div class="card" style="margin-bottom:1rem;">
-          <div class="section-title" style="margin-bottom:1rem;">Top Repair Types</div>
-          <div id="topRepairs">
-            <div class="flex-center"><div class="spinner"></div></div>
-          </div>
-        </div>
-
-        <!-- TOP LOCATIONS -->
-        <div class="card">
-          <div class="section-title" style="margin-bottom:1rem;">Top Locations</div>
-          <div id="topLocations">
-            <div class="flex-center"><div class="spinner"></div></div>
-          </div>
-        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="waitlist-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email</th>
+              <th>Joined</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="waitlistBody">
+            <tr class="loading-row"><td colspan="4"><div class="spinner"></div><br/>Loading waitlist...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-  </div><!-- /admin-main -->
-
-  <!-- BOTTOM NAV (Mobile) -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" id="bn-dashboard" onclick="showPage('dashboard',this)">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Home</span>
-    </button>
-    <button class="nav-item" id="bn-bookings" onclick="showPage('bookings',this)">
-      <span class="nav-icon">📋</span>
-      <span class="nav-label">Bookings</span>
-    </button>
-    <button class="nav-item" id="bn-inventory" onclick="showPage('inventory',this)">
-      <span class="nav-icon">📦</span>
-      <span class="nav-label">Stock</span>
-    </button>
-    <button class="nav-item" id="bn-customers" onclick="showPage('customers',this)">
-      <span class="nav-icon">👥</span>
-      <span class="nav-label">Customers</span>
-    </button>
-    <button class="nav-item" id="bn-analytics" onclick="showPage('analytics',this)">
-      <span class="nav-icon">📈</span>
-      <span class="nav-label">Stats</span>
-    </button>
-  </nav>
-
+  </div><!-- /main -->
 </div><!-- /adminApp -->
 
-<!-- ══════════════════════════════════════════
-     VIEW BOOKING MODAL
-══════════════════════════════════════════ -->
+<!-- VIEW BOOKING MODAL -->
 <div class="modal-overlay" id="viewModal">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Booking Details</div>
-    <div id="viewModalBody"></div>
-    <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('viewModal')">Close</button>
-      <button class="btn btn-primary" style="flex:2" id="viewModalQuoteBtn">Generate Quote →</button>
+    <div class="modal-header">
+      <div class="modal-title">📋 Booking Details</div>
+      <button class="modal-close" onclick="closeModal('viewModal')">×</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('viewModal')">Close</button>
+      <button class="btn-primary" id="viewModalQuoteBtn">Generate Quote</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     QUOTE MODAL
-══════════════════════════════════════════ -->
+<!-- QUOTE MODAL -->
 <div class="modal-overlay" id="quoteModal">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Send Quote 💬</div>
-    <div class="quote-form">
-      <input type="hidden" id="q-booking-id"/>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Customer</label>
-          <input type="text" id="q-name" readonly style="opacity:0.6"/>
-        </div>
-        <div class="form-group">
-          <label>Phone</label>
-          <input type="text" id="q-phone" readonly style="opacity:0.6"/>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Device</label>
-          <input type="text" id="q-device" readonly style="opacity:0.6"/>
-        </div>
-        <div class="form-group">
-          <label>Repair</label>
-          <input type="text" id="q-issue" readonly style="opacity:0.6"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Final Price (K)</label>
-        <div class="price-input-wrap">
-          <span class="price-prefix">K</span>
-          <input type="number" id="q-total-input" value="0" min="0" oninput="updateTotal()"/>
-        </div>
-      </div>
-      <div class="total-display">
-        <div class="total-label">Customer Pays</div>
-        <div class="total-amount" id="q-total">K 0</div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Valid Until</label>
-          <input type="date" id="q-valid"/>
-        </div>
-        <div class="form-group">
-          <label>Email (optional)</label>
-          <input type="email" id="q-email"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Notes <span style="color:var(--muted);font-size:0.65rem;text-transform:none;font-weight:400;">(optional)</span></label>
-        <textarea id="q-notes" placeholder="Anything extra for the customer..." style="min-height:70px;"></textarea>
-      </div>
-      <!-- SEND VIA -->
-      <div class="form-group">
-        <label>Send Via</label>
-        <div class="send-via-group">
-          <label class="send-via-option selected-wa" id="opt-wa">
-            <input type="radio" name="sendVia" value="whatsapp" checked onchange="updateSendOption()"/>
-            💬 WhatsApp
-          </label>
-          <label class="send-via-option" id="opt-email">
-            <input type="radio" name="sendVia" value="email" onchange="updateSendOption()"/>
-            📧 Email
-          </label>
-        </div>
-      </div>
+    <div class="modal-header">
+      <div class="modal-title">💰 Generate Quotation</div>
+      <button class="modal-close" onclick="closeModal('quoteModal')">×</button>
     </div>
-    <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('quoteModal')">Cancel</button>
-      <button class="btn btn-primary" style="flex:2" onclick="submitQuote()">Send Quote →</button>
-    </div>
-  </div>
-</div>
+    <div class="modal-body">
+      <div class="quote-form" id="quoteForm">
+        <input type="hidden" id="q-booking-id"/>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Customer Name</label>
+            <input type="text" id="q-name" readonly/>
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" id="q-phone" readonly/>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Device</label>
+            <input type="text" id="q-device"/>
+          </div>
+          <div class="form-group">
+            <label>Issue / Repair</label>
+            <input type="text" id="q-issue"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Final Price (K) <span style="color:var(--accent);font-size:0.65rem;">— total amount to charge customer</span></label>
+          <input type="number" id="q-total-input" value="0" min="0" oninput="updateTotal()" style="font-size:1.2rem;font-weight:700;"/>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Valid Until</label>
+            <input type="date" id="q-valid"/>
+          </div>
+          <div class="form-group">
+            <label>Customer Email (optional)</label>
+            <input type="email" id="q-email"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes <span style="color:var(--muted);font-size:0.65rem;text-transform:none;font-weight:400;">(optional — shown to customer)</span></label>
+          <textarea id="q-notes" placeholder="e.g. We'll source the part and be there by your preferred time..."></textarea>
+        </div>
+        <div class="total-display">
+          <div class="total-label">Customer Pays</div>
+          <div class="total-amount" id="q-total">K 0</div>
+        </div>
 
-<!-- ══════════════════════════════════════════
-     ADD PART MODAL
-══════════════════════════════════════════ -->
-<div class="modal-overlay" id="addPartModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Add Part to Inventory</div>
-    <div style="display:flex;flex-direction:column;gap:1rem;">
-      <div class="form-group">
-        <label>Part Name</label>
-        <input type="text" id="part-name" placeholder="e.g. Samsung A14 Screen"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Compatible Device</label>
-          <input type="text" id="part-device" placeholder="e.g. Samsung A14"/>
+        <!-- SEND VIA TOGGLE -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;">Send Quote Via</div>
+          <div style="display:flex;gap:0.6rem;">
+            <label style="flex:1;display:flex;align-items:center;gap:0.6rem;background:rgba(37,211,102,0.08);border:2px solid rgba(37,211,102,0.3);border-radius:10px;padding:0.7rem 1rem;cursor:pointer;transition:all 0.2s;" id="wa-option">
+              <input type="radio" name="sendVia" value="whatsapp" checked style="accent-color:#25D366;" onchange="updateSendOption()"/>
+              <span style="font-weight:700;color:#25D366;font-size:0.9rem;">💬 WhatsApp</span>
+            </label>
+            <label style="flex:1;display:flex;align-items:center;gap:0.6rem;background:rgba(0,200,255,0.06);border:2px solid var(--border);border-radius:10px;padding:0.7rem 1rem;cursor:pointer;transition:all 0.2s;" id="email-option">
+              <input type="radio" name="sendVia" value="email" style="accent-color:var(--accent);" onchange="updateSendOption()"/>
+              <span style="font-weight:700;color:var(--muted);font-size:0.9rem;">📧 Email</span>
+            </label>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select id="part-category">
-            <option>Screen</option>
-            <option>Battery</option>
-            <option>Charging Port</option>
-            <option>Camera</option>
-            <option>Back Cover</option>
-            <option>Speaker</option>
-            <option>Other</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Quantity in Stock</label>
-          <input type="number" id="part-qty" value="1" min="0"/>
-        </div>
-        <div class="form-group">
-          <label>Cost Price (K)</label>
-          <input type="number" id="part-cost" value="0" min="0"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Low Stock Alert When Below</label>
-        <input type="number" id="part-min" value="2" min="0"/>
       </div>
     </div>
-    <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('addPartModal')">Cancel</button>
-      <button class="btn btn-primary" style="flex:2" onclick="submitPart()">Add Part →</button>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('quoteModal')">Cancel</button>
+      <button class="btn-primary" id="submitQuoteBtn" onclick="submitQuote()">Send Quote →</button>
     </div>
   </div>
 </div>
 
 <!-- TOAST -->
-<div id="toast"></div>
-
-<!-- ══════════════════════════════════════════
-     SCRIPTS
-══════════════════════════════════════════ -->
-<script src="../assets/js/supabase.js"></script>
-<script src="../assets/js/utils.js"></script>
-<script src="../assets/js/bookings.js"></script>
-<script src="../assets/js/inventory.js"></script>
-<script src="../assets/js/customers.js"></script>
-<script src="../assets/js/analytics.js"></script>
-<script src="../assets/js/auth.js"></script>
+<div class="toast" id="toast"></div>
 
 <script>
+  // ── CONFIG ──
+  const SUPABASE_URL = 'https://mmdtxhletzdmuwtiqppz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tZHR4aGxldHpkbXV3dGlxcHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNDg5MzgsImV4cCI6MjA4ODYyNDkzOH0.aMFeVOjU-osWmLjeDFD5QdAzqy7AJJPSn4-qnGUcZ8o';
+  const ADMIN_PASSWORD = 'luminous2025';
+
+  // ── AUTH ──
+  function doLogin() {
+    const pass = document.getElementById('loginPass').value;
+    if (pass === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminApp').style.display = 'block';
+      sessionStorage.setItem('lt_admin', '1');
+      initDashboard();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginPass').value = '';
+    }
+  }
+
+  function doLogout() {
+    sessionStorage.removeItem('lt_admin');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminApp').style.display = 'none';
+  }
+
+  // Auto-login if session exists
+  if (sessionStorage.getItem('lt_admin') === '1') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+  }
+
+  // ── CLOCK ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleString('en-ZM', {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── SUPABASE FETCH ──
+  async function sbFetch(path, method = 'GET', body = null) {
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=minimal' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+    if (method === 'PATCH' || (method === 'POST' && res.status === 201)) return { ok: true };
+    return res.ok ? res.json() : null;
+  }
+
+  // ── TABS ──
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('section-' + name).classList.add('active');
+    if (name === 'bookings') loadBookings();
+    if (name === 'quotations') loadQuotations();
+    if (name === 'waitlist') loadWaitlist();
+    if (name === 'analytics') loadAnalytics();
+  }
+
   // ── INIT ──
-  // Wait for full page load before checking auth
-  window.addEventListener('load', () => {
-    checkAuth();
-    setInterval(() => {
-      const el = document.getElementById('liveClock');
-      if (el) el.textContent = new Date().toLocaleTimeString('en-ZM');
-    }, 1000);
-  });
+  let allBookings = [];
 
-  // ── PAGES ──
-  function showPage(name, el) {
-    document.querySelectorAll('.admin-page').forEach(p => p.style.display = 'none');
-    document.getElementById('page-' + name).style.display = 'block';
-    document.getElementById('pageTitle').textContent =
-      name.charAt(0).toUpperCase() + name.slice(1);
+  function initDashboard() {
+    loadBookings();
+    loadStats();
+  }
 
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if (el) el.classList.add('active');
-    const bn = document.getElementById('bn-' + name);
-    const sb = document.getElementById('sb-' + name);
-    if (bn) bn.classList.add('active');
-    if (sb) sb.classList.add('active');
+  // ── STATS ──
+  async function loadStats() {
+    const [bookings, quotations] = await Promise.all([
+      sbFetch('bookings?select=status'),
+      sbFetch('quotations?select=total_amount,status')
+    ]);
+    if (bookings) {
+      document.getElementById('statTotal').textContent = bookings.length;
+      document.getElementById('statPending').textContent = bookings.filter(b => b.status === 'pending').length;
+      document.getElementById('statCompleted').textContent = bookings.filter(b => b.status === 'completed').length;
+      document.getElementById('pendingCount').textContent = bookings.filter(b => b.status === 'pending').length;
+      document.getElementById('quotedCount').textContent = bookings.filter(b => b.status === 'quoted').length;
+    }
+    if (quotations) {
+      const revenue = quotations.reduce((sum, q) => sum + (parseFloat(q.total_amount) || 0), 0);
+      document.getElementById('statRevenue').textContent = 'K ' + revenue.toLocaleString();
+    } else {
+      document.getElementById('statRevenue').textContent = 'K 0';
+    }
+  }
 
-    if (name === 'dashboard')  loadDashboard();
-    if (name === 'bookings')   loadBookings();
-    if (name === 'inventory')  loadInventory();
-    if (name === 'customers')  loadCustomers();
-    if (name === 'analytics')  loadAnalytics();
+  // ── BOOKINGS ──
+  async function loadBookings() {
+    document.getElementById('bookingsBody').innerHTML = '<tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Loading...</td></tr>';
+    const data = await sbFetch('bookings?order=created_at.desc&limit=100');
+    allBookings = data || [];
+    renderBookings(allBookings);
+    loadStats();
+  }
+
+  function filterBookings() {
+    const search = document.getElementById('bookingSearch').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    let filtered = allBookings;
+    if (status) filtered = filtered.filter(b => b.status === status);
+    if (search) filtered = filtered.filter(b =>
+      (b.name || '').toLowerCase().includes(search) ||
+      (b.phone || '').toLowerCase().includes(search)
+    );
+    renderBookings(filtered);
+  }
+
+  function renderBookings(bookings) {
+    const tbody = document.getElementById('bookingsBody');
+    if (!bookings || bookings.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No bookings found</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = bookings.map(b => `
+      <tr>
+        <td>
+          <div class="booking-name">${esc(b.name || '—')}</div>
+          <div class="booking-phone">${esc(b.phone || '—')}</div>
+          ${b.notes ? `<div class="booking-device" style="color:var(--accent)">📍 ${esc(b.notes)}</div>` : ''}
+        </td>
+        <td>
+          <div style="font-weight:600;font-size:0.85rem;">${esc(b.repair_type || '—')}</div>
+          <div class="booking-device">${esc(b.device || '—')}</div>
+        </td>
+        <td>
+          <div class="booking-date">${b.preferred_date || '—'}</div>
+          <div class="booking-device">${esc(b.preferred_time || '')}</div>
+        </td>
+        <td><span class="badge ${b.status || 'pending'}">${b.status || 'pending'}</span></td>
+        <td class="booking-date">${formatDate(b.created_at)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-sm btn-view" onclick="viewBooking('${b.id}')">View</button>
+            <button class="btn-sm btn-quote" onclick="openQuoteModal('${b.id}')">Quote</button>
+            <button class="btn-sm btn-wa" onclick="waContact('${b.phone}', '${esc(b.name)}')">WA</button>
+            ${b.status !== 'completed' ? `<button class="btn-sm btn-complete" onclick="updateStatus('${b.id}','completed')">✓ Done</button>` : ''}
+            ${b.status !== 'cancelled' ? `<button class="btn-sm btn-cancel" onclick="updateStatus('${b.id}','cancelled')">✗</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── VIEW BOOKING ──
+  function viewBooking(id) {
+    const b = allBookings.find(x => x.id === id);
+    if (!b) return;
+    document.getElementById('viewModalBody').innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-item-label">Name</div><div class="detail-item-value">${esc(b.name || '—')}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Phone</div><div class="detail-item-value" style="color:var(--accent);font-family:var(--mono)">${esc(b.phone || '—')}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Email</div><div class="detail-item-value">${esc(b.email || '—')}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Status</div><div class="detail-item-value"><span class="badge ${b.status}">${b.status}</span></div></div>
+        <div class="detail-item"><div class="detail-item-label">Device</div><div class="detail-item-value">${esc(b.device || '—')}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Repair Type</div><div class="detail-item-value">${esc(b.repair_type || '—')}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Preferred Date</div><div class="detail-item-value">${esc(b.preferred_date || '—')}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Preferred Time</div><div class="detail-item-value">${esc(b.preferred_time || '—')}</div></div>
+        ${b.notes ? `<div class="detail-item full"><div class="detail-item-label">📍 Location</div><div class="detail-item-value">${esc(b.notes)}</div></div>` : ''}
+        ${b.description ? `<div class="detail-item full"><div class="detail-item-label">🔧 Issue Description</div><div class="detail-item-value">${esc(b.description)}</div></div>` : ''}
+        <div class="detail-item full"><div class="detail-item-label">Submitted</div><div class="detail-item-value" style="font-family:var(--mono);font-size:0.8rem">${new Date(b.created_at).toLocaleString()}</div></div>
+      </div>
+    `;
+    document.getElementById('viewModalQuoteBtn').onclick = () => { closeModal('viewModal'); openQuoteModal(id); };
+    openModal('viewModal');
+  }
+
+  // ── QUOTE MODAL ──
+  function openQuoteModal(id) {
+    const b = allBookings.find(x => x.id === id);
+    if (!b) return;
+    document.getElementById('q-booking-id').value = id;
+    document.getElementById('q-name').value = b.name || '';
+    document.getElementById('q-phone').value = b.phone || '';
+    document.getElementById('q-device').value = b.device || '';
+    document.getElementById('q-issue').value = b.repair_type || '';
+    document.getElementById('q-email').value = b.email || '';
+    document.getElementById('q-total-input').value = 0;
+    document.getElementById('q-notes').value = '';
+    // Default valid until 7 days from now
+    const d = new Date(); d.setDate(d.getDate() + 7);
+    document.getElementById('q-valid').value = d.toISOString().split('T')[0];
+    updateTotal();
+    openModal('quoteModal');
+  }
+
+  function updateTotal() {
+    const total = parseFloat(document.getElementById('q-total-input').value) || 0;
+    document.getElementById('q-total').textContent = 'K ' + total.toLocaleString();
+  }
+
+  async function submitQuote() {
+    const btn = document.getElementById('submitQuoteBtn');
+    const bookingId = document.getElementById('q-booking-id').value;
+    const customerTotal = parseFloat(document.getElementById('q-total-input').value) || 0;
+
+    if (customerTotal <= 0) { showToast('⚠️ Please enter a price.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      // 1. Save quotation
+      const quoteRes = await fetch(SUPABASE_URL + '/rest/v1/quotations', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          booking_id: bookingId,
+          customer_name: document.getElementById('q-name').value,
+          customer_phone: document.getElementById('q-phone').value,
+          customer_email: document.getElementById('q-email').value || null,
+          device: document.getElementById('q-device').value,
+          issue: document.getElementById('q-issue').value,
+          parts_cost: 0,
+          labour_cost: customerTotal,
+          total_amount: customerTotal,
+          valid_until: document.getElementById('q-valid').value,
+          notes: document.getElementById('q-notes').value || null,
+          status: 'sent'
+        })
+      });
+
+      // 2. Update booking status to quoted
+      await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + bookingId, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ status: 'quoted', quote_amount: customerTotal, quote_sent_at: new Date().toISOString() })
+      });
+
+      if (quoteRes.status === 201) {
+        showToast('✅ Quotation saved! Booking marked as quoted.');
+        closeModal('quoteModal');
+        const rawPhone = document.getElementById('q-phone').value;
+        const phone = cleanPhone(rawPhone);
+        const name = document.getElementById('q-name').value;
+        const device = document.getElementById('q-device').value;
+        const issue = document.getElementById('q-issue').value;
+        const notes = document.getElementById('q-notes').value;
+        const valid = document.getElementById('q-valid').value;
+        const email = document.getElementById('q-email').value;
+        const via = document.querySelector('input[name="sendVia"]:checked').value;
+
+        // Build a confirm link that pre-fills the booking reference
+        const confirmParams = new URLSearchParams({
+          ref: bookingId,
+          name: name,
+          device: device,
+          amount: customerTotal
+        });
+        const confirmLink = `https://luminoustech.co.zm/confirm?${confirmParams.toString()}`;
+
+        const msg = `Hi ${name}! 👋\n\nThank you for choosing *LuminOus Tech*.\n\nHere is your quote for the *${issue}* on your *${device}*:\n\n✅ *Price: K ${customerTotal.toLocaleString()}*\n📅 Valid until: ${valid}${notes ? '\n\n📝 ' + notes : ''}\n\n🔗 *Confirm your booking here:*\n${confirmLink}\n\nOr simply reply *YES* to confirm and we will arrange a visit. 🇿🇲\n\n— LuminOus Tech`;
+
+        setTimeout(() => {
+          if (via === 'whatsapp') {
+            window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+          } else {
+            if (!email) { showToast('⚠️ No email address on this booking. Use WhatsApp instead.'); return; }
+            const subject = encodeURIComponent('Your LuminOus Tech Repair Quote');
+            const body = encodeURIComponent(msg.replace(/\*/g, ''));
+            window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+          }
+        }, 500);
+        loadBookings();
+      } else {
+        throw new Error('Failed');
+      }
+    } catch(e) {
+      showToast('❌ Error saving quote. Try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send Quote →';
+    }
+  }
+
+  // ── UPDATE STATUS ──
+  async function updateStatus(id, status) {
+    const labels = { completed: 'mark as completed', cancelled: 'cancel' };
+    if (!confirm(`Are you sure you want to ${labels[status] || 'update'} this booking?`)) return;
+    const body = { status };
+    if (status === 'completed') body.completed_at = new Date().toISOString();
+    await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(body)
+    });
+    showToast(`✅ Booking marked as ${status}`);
+    loadBookings();
+  }
+
+  // ── SEND OPTION TOGGLE ──
+  function updateSendOption() {
+    const via = document.querySelector('input[name="sendVia"]:checked').value;
+    const waOpt = document.getElementById('wa-option');
+    const emailOpt = document.getElementById('email-option');
+    if (via === 'whatsapp') {
+      waOpt.style.borderColor = 'rgba(37,211,102,0.6)';
+      waOpt.style.background = 'rgba(37,211,102,0.12)';
+      waOpt.querySelector('span').style.color = '#25D366';
+      emailOpt.style.borderColor = 'var(--border)';
+      emailOpt.style.background = 'rgba(0,200,255,0.06)';
+      emailOpt.querySelector('span').style.color = 'var(--muted)';
+    } else {
+      emailOpt.style.borderColor = 'rgba(0,200,255,0.5)';
+      emailOpt.style.background = 'rgba(0,200,255,0.1)';
+      emailOpt.querySelector('span').style.color = 'var(--accent)';
+      waOpt.style.borderColor = 'var(--border)';
+      waOpt.style.background = 'rgba(37,211,102,0.06)';
+      waOpt.querySelector('span').style.color = 'var(--muted)';
+    }
+  }
+
+  // ── CLEAN PHONE — handles missing country code ──
+  function cleanPhone(phone) {
+    let p = (phone || '').replace(/[\s\-().+]/g, '');
+    // If starts with 0, replace with Zambia code 260
+    if (p.startsWith('0')) p = '260' + p.slice(1);
+    // If no country code (9 digits or less starting with 7/9), add 260
+    if (p.length <= 9 && /^[79]/.test(p)) p = '260' + p;
+    return p;
+  }
+  function waContact(phone, name) {
+    const clean = cleanPhone(phone);
+    const msg = `Hi ${name}! 👋 This is LuminOus Tech following up on your repair booking. `;
+    window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  // ── ANALYTICS ──
+  async function loadAnalytics() {
+    const grid = document.getElementById('analyticsGrid');
+    grid.innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div class="spinner"></div><br/>Loading analytics...</div>';
+
+    const [bookings, quotations, waitlist] = await Promise.all([
+      sbFetch('bookings?select=status,created_at,repair_type'),
+      sbFetch('quotations?select=total_amount,status,created_at,device,issue'),
+      sbFetch('waitlist?select=id')
+    ]);
+
+    const b = bookings || [];
+    const q = quotations || [];
+    const w = waitlist || [];
+
+    const totalRevenue = q.reduce((s, x) => s + (parseFloat(x.total_amount) || 0), 0);
+    const avgQuote = q.length ? (totalRevenue / q.length) : 0;
+    const convRate = b.length ? Math.round((b.filter(x => x.status === 'completed').length / b.length) * 100) : 0;
+
+    // Revenue by month (last 6 months)
+    const monthMap = {};
+    q.forEach(x => {
+      const d = new Date(x.created_at);
+      const key = d.toLocaleDateString('en-ZM', { month: 'short', year: '2-digit' });
+      monthMap[key] = (monthMap[key] || 0) + (parseFloat(x.total_amount) || 0);
+    });
+    const months = Object.entries(monthMap).slice(-6);
+    const maxMonth = Math.max(...months.map(m => m[1]), 1);
+
+    // Repair type breakdown
+    const repairMap = {};
+    b.forEach(x => { if (x.repair_type) repairMap[x.repair_type] = (repairMap[x.repair_type] || 0) + 1; });
+    const repairs = Object.entries(repairMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const maxRepair = Math.max(...repairs.map(r => r[1]), 1);
+
+    // Status breakdown
+    const statuses = ['pending','quoted','accepted','completed','cancelled'];
+    const statusCounts = statuses.map(s => ({ s, count: b.filter(x => x.status === s).length }));
+    const statusColors = { pending: 'var(--yellow)', quoted: 'var(--accent)', accepted: 'var(--green)', completed: '#4ade80', cancelled: 'var(--red)' };
+
+    grid.innerHTML = `
+      <div class="analytics-card">
+        <div class="analytics-card-title">Total Revenue</div>
+        <div class="analytics-big">K ${totalRevenue.toLocaleString()}</div>
+        <div class="analytics-sub">Across ${q.length} quotation${q.length !== 1 ? 's' : ''}</div>
+        <div class="analytics-breakdown">
+          <div class="breakdown-row"><span class="breakdown-label">Avg Quote Value</span><span class="breakdown-val" style="color:var(--accent)">K ${Math.round(avgQuote).toLocaleString()}</span></div>
+          <div class="breakdown-row"><span class="breakdown-label">Highest Quote</span><span class="breakdown-val" style="color:var(--green)">K ${q.length ? Math.max(...q.map(x=>x.total_amount||0)).toLocaleString() : 0}</span></div>
+          <div class="breakdown-row"><span class="breakdown-label">Conversion Rate</span><span class="breakdown-val" style="color:var(--yellow)">${convRate}%</span></div>
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="analytics-card-title">Booking Status Breakdown</div>
+        ${statusCounts.map(({s, count}) => `
+          <div class="bar-row">
+            <div class="bar-label" style="text-transform:capitalize;">${s}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${b.length ? Math.round(count/b.length*100) : 0}%;background:${statusColors[s]||'var(--muted)'}"></div></div>
+            <div class="bar-val">${count}</div>
+          </div>
+        `).join('')}
+        <div class="analytics-sub" style="margin-top:0.8rem;">${b.length} total bookings</div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="analytics-card-title">Top Repair Types</div>
+        ${repairs.length ? repairs.map(([type, count]) => `
+          <div class="bar-row">
+            <div class="bar-label">${type.length > 10 ? type.slice(0,10)+'…' : type}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxRepair*100)}%;background:var(--accent2)"></div></div>
+            <div class="bar-val">${count}</div>
+          </div>
+        `).join('') : '<div class="analytics-sub">No data yet</div>'}
+        <div class="analytics-sub" style="margin-top:0.8rem;">${w.length} waitlist signups</div>
+      </div>
+
+      <div class="analytics-card analytics-full">
+        <div class="analytics-card-title">Revenue by Month</div>
+        ${months.length ? `
+          <div style="display:flex;align-items:flex-end;gap:0.5rem;height:100px;margin-top:0.5rem;">
+            ${months.map(([month, val]) => `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3rem;">
+                <div style="font-size:0.65rem;font-family:var(--mono);color:var(--accent)">K${val >= 1000 ? (val/1000).toFixed(1)+'k' : val}</div>
+                <div style="width:100%;background:rgba(0,200,255,0.15);border-radius:4px 4px 0 0;height:${Math.round((val/maxMonth)*80)}px;min-height:4px;background:linear-gradient(to top,var(--accent),rgba(0,200,255,0.4))"></div>
+                <div style="font-size:0.65rem;color:var(--muted)">${month}</div>
+              </div>
+            `).join('')}
+          </div>
+        ` : '<div class="analytics-sub" style="padding:2rem 0">No monthly data yet</div>'}
+      </div>
+    `;
+  }
+
+  // ── QUOTATIONS ──
+  async function loadQuotations() {
+    document.getElementById('quotationsBody').innerHTML = '<tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Loading...</td></tr>';
+    const data = await sbFetch('quotations?order=created_at.desc&limit=100');
+    const tbody = document.getElementById('quotationsBody');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">No quotations yet</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map((q, i) => `
+      <tr>
+        <td>
+          <div class="booking-name">${esc(q.customer_name || '—')}</div>
+          <div class="booking-phone">${esc(q.customer_phone || '—')}</div>
+        </td>
+        <td>
+          <div style="font-weight:600;font-size:0.85rem;">${esc(q.issue || '—')}</div>
+          <div class="booking-device">${esc(q.device || '—')}</div>
+        </td>
+        <td style="font-family:var(--mono);font-weight:700;color:var(--accent)">K ${(q.total_amount || 0).toLocaleString()}</td>
+        <td><span class="badge ${q.status || 'sent'}">${q.status || 'sent'}</span></td>
+        <td class="booking-date">${formatDate(q.created_at)}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-sm btn-wa" onclick="waContact('${q.customer_phone}','${esc(q.customer_name)}')">WA</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── WAITLIST ──
+  async function loadWaitlist() {
+    document.getElementById('waitlistBody').innerHTML = '<tr class="loading-row"><td colspan="4"><div class="spinner"></div><br/>Loading...</td></tr>';
+    const data = await sbFetch('waitlist?order=created_at.asc');
+    const tbody = document.getElementById('waitlistBody');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-text">No waitlist signups yet</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map((w, i) => `
+      <tr>
+        <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">${i + 1}</td>
+        <td class="email-val">${esc(w.email)}</td>
+        <td class="booking-date">${formatDate(w.created_at)}</td>
+        <td>
+          <a href="mailto:${esc(w.email)}" class="btn-sm btn-quote" style="text-decoration:none;display:inline-block">Email</a>
+        </td>
+      </tr>
+    `).join('');
   }
 
   // ── MODALS ──
-  function openModal(id) {
-    document.getElementById(id).classList.add('active');
-  }
-  function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', e => {
-        if (e.target === overlay) overlay.classList.remove('active');
-      });
-    });
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
   });
-</script>
 
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── HELPERS ──
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-ZM', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // ── BOOT ──
+  if (sessionStorage.getItem('lt_admin') === '1') initDashboard();
+</script>
 </body>
 </html>
