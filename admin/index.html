@@ -210,6 +210,9 @@
   .btn-view:hover { border-color: var(--accent); color: var(--accent); }
   .btn-wa { background: rgba(37,211,102,0.1); color: #25D366; border: 1px solid rgba(37,211,102,0.2); }
   .btn-wa:hover { background: rgba(37,211,102,0.2); }
+  .btn-paid { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+  .btn-paid:hover { background: rgba(139,92,246,0.22); }
+  .btn-paid-done { background: transparent; color: #a78bfa; border: 1px solid rgba(139,92,246,0.15); opacity: 0.6; cursor: default; }
 
   /* ── EMPTY STATE ── */
   .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
@@ -816,7 +819,7 @@
   // ── STATS ──
   async function loadStats() {
     const [bookings, quotations] = await Promise.all([
-      sbFetch('bookings?select=id,status'),
+      sbFetch('bookings?select=id,status,paid'),
       sbFetch('quotations?select=booking_id,total_amount,status')
     ]);
     if (bookings) {
@@ -881,13 +884,14 @@
           <div class="booking-date">${b.preferred_date || '—'}</div>
           <div class="booking-device">${esc(b.preferred_time || '')}</div>
         </td>
-        <td><span class="badge ${b.status || 'pending'}">${b.status || 'pending'}</span></td>
+        <td><span class="badge ${b.status || 'pending'}">${b.status || 'pending'}</span>${b.paid ? ' <span class="badge paid">paid</span>' : ''}</td>
         <td class="booking-date">${formatDate(b.created_at)}</td>
         <td>
           <div class="action-btns">
             <button class="btn-sm btn-view" onclick="viewBooking('${b.id}')">View</button>
             <button class="btn-sm btn-quote" onclick="openQuoteModal('${b.id}')">Quote</button>
             <button class="btn-sm btn-wa" onclick="waContact('${b.phone}', '${esc(b.name)}')">WA</button>
+            ${!b.paid ? `<button class="btn-sm btn-paid" onclick="markPaid('${b.id}')">💳 Paid</button>` : `<span class="btn-sm btn-paid-done">✓ Paid</span>`}
             ${b.status !== 'completed' ? `<button class="btn-sm btn-complete" onclick="updateStatus('${b.id}','completed')">✓ Done</button>` : ''}
             ${b.status !== 'cancelled' ? `<button class="btn-sm btn-cancel" onclick="updateStatus('${b.id}','cancelled')">✗</button>` : ''}
           </div>
@@ -919,7 +923,7 @@
         <div class="detail-item"><div class="detail-item-label">Name</div><div class="detail-item-value">${esc(b.name || '—')}</div></div>
         <div class="detail-item"><div class="detail-item-label">Phone</div><div class="detail-item-value" style="color:var(--accent);font-family:var(--mono)">${esc(b.phone || '—')}</div></div>
         <div class="detail-item"><div class="detail-item-label">Email</div><div class="detail-item-value">${esc(b.email || '—')}</div></div>
-        <div class="detail-item"><div class="detail-item-label">Status</div><div class="detail-item-value"><span class="badge ${b.status}">${b.status}</span></div></div>
+        <div class="detail-item"><div class="detail-item-label">Status</div><div class="detail-item-value"><span class="badge ${b.status}">${b.status}</span>${b.paid ? ' <span class="badge paid">paid</span>' : ''}</div></div>
         <div class="detail-item"><div class="detail-item-label">Device</div><div class="detail-item-value">${esc(b.device || '—')}</div></div>
         <div class="detail-item"><div class="detail-item-label">Repair Type</div><div class="detail-item-value">${esc(b.repair_type || '—')}</div></div>
         <div class="detail-item"><div class="detail-item-label">Preferred Date</div><div class="detail-item-value">${esc(b.preferred_date || '—')}</div></div>
@@ -927,6 +931,7 @@
         ${b.notes ? `<div class="detail-item full"><div class="detail-item-label">📍 Location</div><div class="detail-item-value">${esc(b.notes)}</div></div>` : ''}
         ${b.description ? `<div class="detail-item full"><div class="detail-item-label">🔧 Issue Description</div><div class="detail-item-value">${esc(b.description)}</div></div>` : ''}
         ${photosHtml}
+        ${b.paid && b.paid_at ? `<div class="detail-item full"><div class="detail-item-label">💳 Paid At</div><div class="detail-item-value" style="font-family:var(--mono);font-size:0.8rem;color:#a78bfa">${new Date(b.paid_at).toLocaleString()}</div></div>` : ''}
         <div class="detail-item full"><div class="detail-item-label">Submitted</div><div class="detail-item-value" style="font-family:var(--mono);font-size:0.8rem">${new Date(b.created_at).toLocaleString()}</div></div>
       </div>
     `;
@@ -1043,6 +1048,23 @@
       btn.disabled = false;
       btn.textContent = 'Send Quote →';
     }
+  }
+
+  // ── MARK AS PAID ──
+  async function markPaid(id) {
+    if (!confirm('Mark this booking as paid?')) return;
+    await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ paid: true, paid_at: new Date().toISOString() })
+    });
+    showToast('💳 Booking marked as paid');
+    loadBookings();
   }
 
   // ── UPDATE STATUS ──
