@@ -318,6 +318,15 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ── BOOKING PHOTOS ── */
+  .booking-photos-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+  .booking-photo-thumb {
+    width: 90px; height: 90px; object-fit: cover;
+    border-radius: 8px; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .booking-photo-thumb:hover { border-color: var(--accent); transform: scale(1.05); box-shadow: 0 0 12px rgba(0,200,255,0.2); }
+
   /* ── ANALYTICS ── */
   .analytics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
   .analytics-card {
@@ -832,7 +841,7 @@
   // ── BOOKINGS ──
   async function loadBookings() {
     document.getElementById('bookingsBody').innerHTML = '<tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Loading...</td></tr>';
-    const data = await sbFetch('bookings?order=created_at.desc&limit=100');
+    const data = await sbFetch('bookings?order=created_at.desc&limit=100&select=*');
     allBookings = data || [];
     renderBookings(allBookings);
     loadStats();
@@ -862,6 +871,7 @@
           <div class="booking-name">${esc(b.name || '—')}</div>
           <div class="booking-phone">${esc(b.phone || '—')}</div>
           ${b.notes ? `<div class="booking-device" style="color:var(--accent)">📍 ${esc(b.notes)}</div>` : ''}
+          ${b.photos && b.photos.length > 0 ? `<div class="booking-device" style="color:var(--yellow)">📷 ${b.photos.length} photo${b.photos.length > 1 ? 's' : ''}</div>` : ''}
         </td>
         <td>
           <div style="font-weight:600;font-size:0.85rem;">${esc(b.repair_type || '—')}</div>
@@ -890,6 +900,20 @@
   function viewBooking(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
+
+    const photosHtml = (b.photos && b.photos.length > 0) ? `
+      <div class="detail-item full">
+        <div class="detail-item-label">📷 Device Photos (${b.photos.length})</div>
+        <div class="booking-photos-grid">
+          ${b.photos.map(url => `
+            <a href="${url}" target="_blank" rel="noopener" title="Open full size">
+              <img src="${url}" class="booking-photo-thumb" alt="Device photo" onerror="this.parentElement.style.display='none'"/>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
     document.getElementById('viewModalBody').innerHTML = `
       <div class="detail-grid">
         <div class="detail-item"><div class="detail-item-label">Name</div><div class="detail-item-value">${esc(b.name || '—')}</div></div>
@@ -902,6 +926,7 @@
         <div class="detail-item"><div class="detail-item-label">Preferred Time</div><div class="detail-item-value">${esc(b.preferred_time || '—')}</div></div>
         ${b.notes ? `<div class="detail-item full"><div class="detail-item-label">📍 Location</div><div class="detail-item-value">${esc(b.notes)}</div></div>` : ''}
         ${b.description ? `<div class="detail-item full"><div class="detail-item-label">🔧 Issue Description</div><div class="detail-item-value">${esc(b.description)}</div></div>` : ''}
+        ${photosHtml}
         <div class="detail-item full"><div class="detail-item-label">Submitted</div><div class="detail-item-value" style="font-family:var(--mono);font-size:0.8rem">${new Date(b.created_at).toLocaleString()}</div></div>
       </div>
     `;

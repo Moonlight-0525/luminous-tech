@@ -947,6 +947,8 @@
     const desc = document.getElementById('book-desc').value.trim();
     const btn = document.getElementById('bookingBtn');
     const statusEl = document.getElementById('bookingStatus');
+    const photoInput = document.getElementById('book-photos');
+    const photoFiles = photoInput ? Array.from(photoInput.files) : [];
 
     if (!fname || !phone) {
       showToast('⚠️ Please fill in at least your name and phone number.');
@@ -954,24 +956,31 @@
     }
 
     btn.disabled = true;
-    btn.textContent = 'Submitting...';
+    btn.textContent = photoFiles.length > 0 ? 'Uploading photos...' : 'Submitting...';
     statusEl.style.display = 'none';
 
     try {
+      // Upload photos first if any
+      let photoUrls = [];
+      if (photoFiles.length > 0) {
+        photoUrls = await uploadPhotos(photoFiles);
+        btn.textContent = 'Saving booking...';
+      }
+
       const payload = {
         name: fname + ' ' + lname,
         phone,
         email: email || null,
+        notes: address || null,
         device: (brand ? brand + ' ' : '') + model,
         repair_type: repair || 'Not specified',
         preferred_date: date || null,
         preferred_time: time,
         description: desc || null,
-        notes: address || null,
+        photos: photoUrls.length > 0 ? photoUrls : null,
         status: 'pending'
       };
 
-      // Direct fetch so we can see the real error
       const rawRes = await fetch(SUPABASE_URL + '/rest/v1/bookings', {
         method: 'POST',
         headers: {
@@ -983,8 +992,6 @@
         body: JSON.stringify(payload)
       });
       const result = await rawRes.json();
-      console.log('Supabase response status:', rawRes.status);
-      console.log('Supabase response:', JSON.stringify(result));
 
       if (rawRes.ok && result && result.length > 0) {
         statusEl.style.display = 'block';
@@ -995,6 +1002,7 @@
         ['book-fname','book-lname','book-phone','book-email','book-address','book-model','book-date','book-desc'].forEach(id => {
           document.getElementById(id).value = '';
         });
+        if (photoInput) { photoInput.value = ''; document.getElementById('book-preview').innerHTML = ''; }
         btn.textContent = 'Booking Sent ✓';
         setTimeout(() => { btn.textContent = 'Confirm Booking →'; btn.disabled = false; }, 4000);
       } else {
@@ -1634,7 +1642,7 @@
           <div class="contact-icon">📧</div>
           <div class="contact-text">
             <h4>Email</h4>
-            <p>hello@luminoustech.zm</p>
+            <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d6beb3babab996baa3bbbfb8b9a3a5a2b3b5bef8acbb">[email&#160;protected]</a></p>
             <p>We reply within 1 hour</p>
           </div>
         </div>
@@ -1694,7 +1702,7 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── SUPABASE CONFIG & sbFetch defined in <head> ──
 
   // ══════════════════════════════════════════
@@ -1830,15 +1838,48 @@
   function handlePhotoUpload(input, previewId) {
     const preview = document.getElementById(previewId);
     preview.innerHTML = '';
-    Array.from(input.files).forEach(file => {
+    const files = Array.from(input.files);
+    if (files.length === 0) return;
+    files.forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative;display:inline-block;';
         const img = document.createElement('img');
-        img.src = e.target.result; img.className = 'photo-thumb'; img.title = file.name;
-        preview.appendChild(img);
+        img.src = e.target.result;
+        img.className = 'photo-thumb';
+        img.title = file.name;
+        wrap.appendChild(img);
+        preview.appendChild(wrap);
       };
       reader.readAsDataURL(file);
     });
+    // Update upload label
+    const hint = input.closest('.photo-upload')?.querySelector('.photo-upload-text');
+    if (hint) hint.textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected ✓`;
+  }
+
+  // ── UPLOAD PHOTOS TO SUPABASE STORAGE ──
+  async function uploadPhotos(files) {
+    const urls = [];
+    for (const file of files) {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `bookings/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/booking-photos/${path}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': file.type || 'image/jpeg',
+          'x-upsert': 'true'
+        },
+        body: file
+      });
+      if (res.ok) {
+        urls.push(`${SUPABASE_URL}/storage/v1/object/public/booking-photos/${path}`);
+      }
+    }
+    return urls;
   }
 
   // ══════════════════════════════════════════
