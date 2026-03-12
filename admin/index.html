@@ -705,8 +705,8 @@
   // ── STATS ──
   async function loadStats() {
     const [bookings, quotations] = await Promise.all([
-      sbFetch('bookings?select=status'),
-      sbFetch('quotations?select=total_amount,status')
+      sbFetch('bookings?select=id,status'),
+      sbFetch('quotations?select=booking_id,total_amount,status')
     ]);
     if (bookings) {
       document.getElementById('statTotal').textContent = bookings.length;
@@ -716,7 +716,11 @@
       document.getElementById('quotedCount').textContent = bookings.filter(b => b.status === 'quoted').length;
     }
     if (quotations) {
-      const revenue = quotations.reduce((sum, q) => sum + (parseFloat(q.total_amount) || 0), 0);
+      // Only count revenue from quotations where the booking was actually completed
+      const completedIds = new Set((bookings || []).filter(b => b.status === 'completed').map(b => b.id));
+      const revenue = quotations
+        .filter(q => completedIds.has(q.booking_id))
+        .reduce((sum, q) => sum + (parseFloat(q.total_amount) || 0), 0);
       document.getElementById('statRevenue').textContent = 'K ' + revenue.toLocaleString();
     } else {
       document.getElementById('statRevenue').textContent = 'K 0';
@@ -984,8 +988,8 @@
     grid.innerHTML = '<div style="text-align:center;padding:4rem;color:var(--muted)"><div class="spinner"></div><br/>Loading analytics...</div>';
 
     const [bookings, quotations, waitlist] = await Promise.all([
-      sbFetch('bookings?select=status,created_at,repair_type'),
-      sbFetch('quotations?select=total_amount,status,created_at,device,issue'),
+      sbFetch('bookings?select=id,status,created_at,repair_type'),
+      sbFetch('quotations?select=booking_id,total_amount,status,created_at,device,issue'),
       sbFetch('waitlist?select=id')
     ]);
 
@@ -993,13 +997,16 @@
     const q = quotations || [];
     const w = waitlist || [];
 
-    const totalRevenue = q.reduce((s, x) => s + (parseFloat(x.total_amount) || 0), 0);
-    const avgQuote = q.length ? (totalRevenue / q.length) : 0;
+    // Only revenue from completed bookings
+    const completedIds = new Set(b.filter(x => x.status === 'completed').map(x => x.id));
+    const completedQuotes = q.filter(x => completedIds.has(x.booking_id));
+    const totalRevenue = completedQuotes.reduce((s, x) => s + (parseFloat(x.total_amount) || 0), 0);
+    const avgQuote = q.length ? (q.reduce((s, x) => s + (parseFloat(x.total_amount) || 0), 0) / q.length) : 0;
     const convRate = b.length ? Math.round((b.filter(x => x.status === 'completed').length / b.length) * 100) : 0;
 
-    // Revenue by month (last 6 months)
+    // Revenue by month — only completed
     const monthMap = {};
-    q.forEach(x => {
+    completedQuotes.forEach(x => {
       const d = new Date(x.created_at);
       const key = d.toLocaleDateString('en-ZM', { month: 'short', year: '2-digit' });
       monthMap[key] = (monthMap[key] || 0) + (parseFloat(x.total_amount) || 0);
@@ -1025,7 +1032,7 @@
         <div class="analytics-sub">Across ${q.length} quotation${q.length !== 1 ? 's' : ''}</div>
         <div class="analytics-breakdown">
           <div class="breakdown-row"><span class="breakdown-label">Avg Quote Value</span><span class="breakdown-val" style="color:var(--accent)">K ${Math.round(avgQuote).toLocaleString()}</span></div>
-          <div class="breakdown-row"><span class="breakdown-label">Highest Quote</span><span class="breakdown-val" style="color:var(--green)">K ${q.length ? Math.max(...q.map(x=>x.total_amount||0)).toLocaleString() : 0}</span></div>
+          <div class="breakdown-row"><span class="breakdown-label">Highest Earned</span><span class="breakdown-val" style="color:var(--green)">K ${completedQuotes.length ? Math.max(...completedQuotes.map(x=>x.total_amount||0)).toLocaleString() : 0}</span></div>
           <div class="breakdown-row"><span class="breakdown-label">Conversion Rate</span><span class="breakdown-val" style="color:var(--yellow)">${convRate}%</span></div>
         </div>
       </div>
