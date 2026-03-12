@@ -351,6 +351,19 @@
     width: 70px; height: 70px; border-radius: 8px; object-fit: cover;
     border: 1px solid var(--border);
   }
+  .photo-thumb-wrap {
+    position: relative; display: inline-block;
+  }
+  .photo-thumb-remove {
+    position: absolute; top: -6px; right: -6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #ef4444; border: 2px solid var(--bg);
+    color: #fff; font-size: 0.65rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; line-height: 1; transition: background 0.15s;
+    z-index: 2;
+  }
+  .photo-thumb-remove:hover { background: #b91c1c; }
 
   .nav-theme-btn {
     background: var(--card); border: 1px solid var(--border);
@@ -947,8 +960,7 @@
     const desc = document.getElementById('book-desc').value.trim();
     const btn = document.getElementById('bookingBtn');
     const statusEl = document.getElementById('bookingStatus');
-    const photoInput = document.getElementById('book-photos');
-    const photoFiles = photoInput ? Array.from(photoInput.files) : [];
+    const photoFiles = selectedPhotoFiles.slice(); // copy current list
 
     if (!fname || !phone) {
       showToast('⚠️ Please fill in at least your name and phone number.');
@@ -1002,7 +1014,11 @@
         ['book-fname','book-lname','book-phone','book-email','book-address','book-model','book-date','book-desc'].forEach(id => {
           document.getElementById(id).value = '';
         });
-        if (photoInput) { photoInput.value = ''; document.getElementById('book-preview').innerHTML = ''; }
+        if (photoInput) { photoInput.value = ''; }
+        selectedPhotoFiles = [];
+        document.getElementById('book-preview').innerHTML = '';
+        const hint = document.querySelector('.photo-upload-text');
+        if (hint) hint.textContent = 'Click to upload photos of the damage';
         btn.textContent = 'Booking Sent ✓';
         setTimeout(() => { btn.textContent = 'Confirm Booking →'; btn.disabled = false; }, 4000);
       } else {
@@ -1835,28 +1851,52 @@
   // ══════════════════════════════════════════
   // PHOTO UPLOAD
   // ══════════════════════════════════════════
+  // ── PHOTO FILE TRACKER ──
+  let selectedPhotoFiles = [];
+
   function handlePhotoUpload(input, previewId) {
+    const newFiles = Array.from(input.files);
+    newFiles.forEach(f => {
+      // avoid duplicates by name+size
+      if (!selectedPhotoFiles.find(x => x.name === f.name && x.size === f.size)) {
+        selectedPhotoFiles.push(f);
+      }
+    });
+    // Reset input so same file can be re-added after removal
+    input.value = '';
+    renderPhotoPreview(previewId);
+  }
+
+  function removePhoto(index, previewId) {
+    selectedPhotoFiles.splice(index, 1);
+    renderPhotoPreview(previewId);
+  }
+
+  function renderPhotoPreview(previewId) {
     const preview = document.getElementById(previewId);
     preview.innerHTML = '';
-    const files = Array.from(input.files);
-    if (files.length === 0) return;
-    files.forEach(file => {
+    selectedPhotoFiles.forEach((file, i) => {
       const reader = new FileReader();
       reader.onload = e => {
         const wrap = document.createElement('div');
-        wrap.style.cssText = 'position:relative;display:inline-block;';
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.className = 'photo-thumb';
-        img.title = file.name;
-        wrap.appendChild(img);
+        wrap.className = 'photo-thumb-wrap';
+        wrap.innerHTML = `
+          <img src="${e.target.result}" class="photo-thumb" title="${file.name}"/>
+          <div class="photo-thumb-remove" onclick="removePhoto(${i}, '${previewId}')" title="Remove">✕</div>
+        `;
         preview.appendChild(wrap);
       };
       reader.readAsDataURL(file);
     });
-    // Update upload label
-    const hint = input.closest('.photo-upload')?.querySelector('.photo-upload-text');
-    if (hint) hint.textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected ✓`;
+    // Update label
+    const count = selectedPhotoFiles.length;
+    const uploadEl = document.querySelector(`#${previewId}`).previousElementSibling;
+    const hint = uploadEl?.querySelector('.photo-upload-text');
+    if (hint) {
+      hint.textContent = count > 0
+        ? `${count} photo${count > 1 ? 's' : ''} selected ✓`
+        : 'Click to upload photos of the damage';
+    }
   }
 
   // ── UPLOAD PHOTOS TO SUPABASE STORAGE ──
